@@ -23,7 +23,7 @@ Model 1 (the released student, repository `small-regulatory-dna-model`) was trai
 - **Recipe:** as in model 1's tests: each 200-letter piece between the training adapters, both orientations averaged, effect = version 2 minus version 1.
 - **Interval:** 2,000 bootstrap resamples of 100,000-letter genome blocks (neighbouring variants share DNA, so variants are not resampled one by one), the same resample for every model.
 - **Compared with:** model 1 (main seed), run on exactly the same variants. Also reported: published MPRA-LegNet, the 6-letter-word baseline, model 2's second seed.
-- **Which read-out of model 2** (its lentiMPRA outputs, its new outputs, or both averaged) is chosen on practice data and written here before the test.
+- **Which read-out of model 2:** its **new outputs** (the HepG2 and K562 outputs trained on the natural-variant table). Chosen on 2026-11-15 on practice data only, with two seeds: effect correlation on the practice chromosomes 0.573 / 0.573 for the new outputs, 0.570 / 0.572 for both averaged, 0.511 / 0.522 for the lentiMPRA outputs.
 
 <!-- students: {"fixed": false} -->
 
@@ -37,7 +37,7 @@ Model 1 (the released student, repository `small-regulatory-dna-model`) was trai
 
 <!-- marks: {"min_gain": 0.03, "max_cell_deficit": 0.01, "max_seed_gap": 0.02} -->
 
-**Are the marks reachable?** Not known yet. What is known from the practice chromosomes (6, 13, 20; `results/practice/references.json`): model 1 scores 0.491 on this measure (seed 2: 0.484), the published model 0.455, the 6-letter-word baseline 0.313. The table's own standard errors put the ceiling for a perfect model near 0.91 (an estimate). Model 2's first practice run (one seed, new outputs) scores 0.573 against model 1's 0.491; the 95% interval of the difference is 0.068 to 0.098 (details: `results/PRACTICE_RUN_1.md`). On this practice evidence, from one seed, the 0.03 mark looks reachable. That is a practice reading, not a test result.
+**Are the marks reachable?** Not known yet. What is known from the practice chromosomes (6, 13, 20; `results/practice/references.json`): model 1 scores 0.491 on this measure (seed 2: 0.484), the published model 0.455, the 6-letter-word baseline 0.313. The table's own standard errors put the ceiling for a perfect model near 0.91 (an estimate). Model 2's two practice runs (two seeds, new outputs, no self-teaching step) score 0.573 and 0.573 against model 1's 0.491; the 95% intervals of the difference are 0.068 to 0.098 and 0.066 to 0.099. On the saturation scan's practice half they score 0.687 and 0.679 against model 1's 0.627 (`results/PRACTICE_RUN_1.md`, `results/practice/SEED2_SUMMARY.txt`). On this practice evidence the 0.03 mark and the seed mark look reachable. These are practice readings, not test results.
 
 ## Reported beside the test, not pass or fail
 - The same measure on the locked variants whose pieces share **no** 24-letter word with any training piece (a stricter view of leakage through repeated DNA).

@@ -15,6 +15,10 @@ practice chromosomes are not used to pick the checkpoint.
 
   --new_cells LIST   which new outputs to train (comma-separated table names; "none" = the control run:
                      lentiMPRA only, with the same pieces removed by the leak guards)
+  --teachers PATHS   model 1's second step, applied to model 2: comma-separated best.pt files of trained
+                     copies of this same model. The student then also learns their averaged prediction for
+                     ALL outputs, on every piece and on a copy of it with --mut of its letters swapped
+                     (for which no lab label exists). Teachers saw the same training rows as the student.
 Practice data only. The locked chromosomes (5, 14, 22) and lentiMPRA fold 10 are never loaded.
 
 Run from the repository root:
@@ -39,6 +43,7 @@ from mpra_data import CELLS, TRAIN_FOLDS, VALIDATION_FOLD, element_pearson, enco
 from mpra_model import count_parameters  # noqa: E402
 from mpra_train import RUNS  # noqa: E402
 from mpra_train_multi import predict_multi  # noqa: E402
+from mpra_distill import mutate  # noqa: E402
 from mpra_train_v2 import RIGHT_FLANK, build, flank_shift  # noqa: E402
 
 MORE = Path("data/more_data")
@@ -82,12 +87,17 @@ def main() -> None:
     ap.add_argument("--lr", type=float, default=0.01)
     ap.add_argument("--wd", type=float, default=0.1)
     ap.add_argument("--shift", type=int, default=21)
+    ap.add_argument("--teachers", default="", help="comma-separated best.pt files of trained copies (self-distillation)")
+    ap.add_argument("--lam", type=float, default=1.0, help="weight of the teacher targets against the lab labels")
+    ap.add_argument("--mut", type=float, default=0.05, help="share of letters swapped in the changed copies (0 = no copies)")
     ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only")
     ap.add_argument("--tag", default="")
     args = ap.parse_args()
     new_cells = [] if args.new_cells == "none" else args.new_cells.split(",")
     n_out = len(CELLS) + len(new_cells)
-    name = f"more_{'-'.join(new_cells) if new_cells else 'control'}_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}"
+    teacher_paths = [t for t in args.teachers.split(",") if t]
+    name = f"more_{'-'.join(new_cells) if new_cells else 'control'}" \
+           + (f"_distill_t{len(teacher_paths)}_lam{args.lam}_mut{args.mut}" if teacher_paths else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}"
     run_dir = Path(RUNS) / name
     run_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
@@ -135,6 +145,27 @@ def main() -> None:
     readout.update({f"new_{cell}": (cell, len(CELLS) + j) for j, cell in enumerate(new_cells) if cell in ("HEPG2", "K562", "SKNSH")})
     flank = torch.from_numpy(encode(pd.Series([RIGHT_FLANK]))[0])
 
+    teachers = []
+    for path in teacher_paths:
+        t_cfg = json.loads((Path(path).parent / "log.json").read_text())["config"]
+        assert t_cfg["outputs"] == CELLS + [f"new_{c}" for c in new_cells], f"{path}: different outputs"
+        assert np.allclose(t_cfg["label_mean"], mean, atol=1e-4) and np.allclose(t_cfg["label_std"], std, atol=1e-4), \
+            f"{path}: the teacher's label scaling differs, so it was not trained on the same rows"
+        t = build("legnet", n_out).to(device)
+        t.load_state_dict(torch.load(path, map_location=device, weights_only=True))
+        teachers.append(t.eval())
+    if teachers:
+        tv = {c: element_pearson(val[c], np.mean([predict_multi(t, x_val[c], device)[:, k] for t in teachers], axis=0)) for k, c in enumerate(CELLS)}
+        for t in teachers:
+            t.eval()  # predict_multi leaves a model in training mode; teachers must stay frozen
+        print("teachers averaged, fold 9: " + ", ".join(f"{c} {v:.3f}" for c, v in tv.items()) + f", mean {np.mean(list(tv.values())):.3f}", flush=True)
+
+    @torch.no_grad()
+    def teach(c: torch.Tensor) -> torch.Tensor:
+        with torch.autocast("cuda", enabled=device.type == "cuda"):
+            out = sum(t(onehot(c)) + t(onehot(reverse_complement_codes(c))) for t in teachers) / (2 * len(teachers))
+        return out.float()
+
     model = build("legnet", n_out).to(device)
     steps_per_epoch = (len(x_tr) + args.batch - 1) // args.batch
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr / 25, weight_decay=args.wd)
@@ -155,14 +186,18 @@ def main() -> None:
             c = x_tr[idx]
             if args.shift:
                 c = flank_shift(c, args.shift, flank, gen)
+            if teachers and args.mut:
+                c = torch.cat([c, mutate(c, args.mut, gen)])
             c, target = c.to(device), y_tr[idx].to(device)
             if torch.rand(1, generator=gen).item() < 0.5:
                 c = reverse_complement_codes(c)
             pred = model(onehot(c))
             seen = ~torch.isnan(target)
-            err = torch.where(seen, (pred - torch.nan_to_num(target)) ** 2, torch.zeros_like(pred))
+            err = torch.where(seen, (pred[: len(idx)] - torch.nan_to_num(target)) ** 2, torch.zeros_like(target))
             n = seen.sum(0)
             loss = (err.sum(0)[n > 0] / n[n > 0]).mean()  # mean per output over its measured rows, then over outputs
+            if teachers:  # the teachers' averaged prediction, all outputs, pieces and changed copies
+                loss = loss + args.lam * torch.nn.functional.mse_loss(pred, teach(c))
             opt.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
