@@ -1,0 +1,77 @@
+{
+  "run": null,
+  "natural_variants_practice_chromosomes": {
+    "student_v2": {
+      "HepG2": {
+        "activity": 0.6062707892568345,
+        "effect": 0.4961654737064283,
+        "effect_variants": 5400
+      },
+      "K562": {
+        "activity": 0.6135719412358832,
+        "effect": 0.4849543392690853,
+        "effect_variants": 5788
+      },
+      "mean_effect": 0.4905599064877568,
+      "mean_activity": 0.6099213652463589,
+      "mean_effect_minus_model1_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "student_v2_seed2": {
+      "HepG2": {
+        "activity": 0.6053239958588552,
+        "effect": 0.48992898858294587,
+        "effect_variants": 5400
+      },
+      "K562": {
+        "activity": 0.6083935523381893,
+        "effect": 0.47797568032769283,
+        "effect_variants": 5788
+      },
+      "mean_effect": 0.4839523344553194,
+      "mean_activity": 0.6068587740985223,
+      "mean_effect_minus_model1_ci95": [
+        -0.013535805606889502,
+        0.00027665859435920995
+      ]
+    },
+    "published": {
+      "HepG2": {
+        "activity": 0.5778082740790127,
+        "effect": 0.4384087592553714,
+        "effect_variants": 5400
+      },
+      "K562": {
+        "activity": 0.5894444526293595,
+        "effect": 0.47147461190005724,
+        "effect_variants": 5788
+      },
+      "mean_effect": 0.4549416855777143,
+      "mean_activity": 0.583626363354186,
+      "mean_effect_minus_model1_ci95": [
+        -0.04589217872431906,
+        -0.02488322504730548
+      ]
+    },
+    "baseline": {
+      "HepG2": {
+        "activity": 0.3904144074706671,
+        "effect": 0.32907804857883133,
+        "effect_variants": 5400
+      },
+      "K562": {
+        "activity": 0.42392186626446704,
+        "effect": 0.29681906168146965,
+        "effect_variants": 5788
+      },
+      "mean_effect": 0.3129485551301505,
+      "mean_activity": 0.40716813686756703,
+      "mean_effect_minus_model1_ci95": [
+        -0.2008344514160591,
+        -0.15474493335481598
+      ]
+    }
+  }
+}

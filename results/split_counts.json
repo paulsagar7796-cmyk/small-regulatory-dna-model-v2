@@ -1,0 +1,19 @@
+{
+ "usable_single_letter_variants": 281325,
+ "by_part_before_guards": {
+  "train": 223725,
+  "locked": 29456,
+  "practice": 28144
+ },
+ "removed_scan_neighbours_all_parts": 475,
+ "of_which_within_200_letters": 193,
+ "removed_train_same_dna_as_held_out_variants": 11509,
+ "removed_train_same_dna_as_lentimpra_fold_9_10": 6041,
+ "by_part_after_guards": {
+  "train": 208783,
+  "locked": 29397,
+  "practice": 28104
+ },
+ "lentimpra_training_pieces_removed": 5950,
+ "lentimpra_training_pieces_total": 276476
+}
