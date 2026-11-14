@@ -6,3 +6,4 @@ __pycache__/
 data
 runs/
 released_weights
+results/practice/*.parquet

@@ -37,7 +37,7 @@ Model 1 (the released student, repository `small-regulatory-dna-model`) was trai
 
 <!-- marks: {"min_gain": 0.03, "max_cell_deficit": 0.01, "max_seed_gap": 0.02} -->
 
-**Are the marks reachable?** Not known yet. What is known from the practice chromosomes (6, 13, 20; `results/practice/references.json`): model 1 scores 0.491 on this measure (seed 2: 0.484), the published model 0.455, the 6-letter-word baseline 0.313. The table's own standard errors put the ceiling for a perfect model near 0.91 (an estimate). Model 2's practice numbers will be added here before the maintainer is asked to confirm.
+**Are the marks reachable?** Not known yet. What is known from the practice chromosomes (6, 13, 20; `results/practice/references.json`): model 1 scores 0.491 on this measure (seed 2: 0.484), the published model 0.455, the 6-letter-word baseline 0.313. The table's own standard errors put the ceiling for a perfect model near 0.91 (an estimate). Model 2's first practice run (one seed, new outputs) scores 0.573 against model 1's 0.491; the 95% interval of the difference is 0.068 to 0.098 (details: `results/PRACTICE_RUN_1.md`). On this practice evidence, from one seed, the 0.03 mark looks reachable. That is a practice reading, not a test result.
 
 ## Reported beside the test, not pass or fail
 - The same measure on the locked variants whose pieces share **no** 24-letter word with any training piece (a stricter view of leakage through repeated DNA).

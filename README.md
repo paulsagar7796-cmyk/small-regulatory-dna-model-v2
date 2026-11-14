@@ -2,7 +2,7 @@
 
 **Work in progress: model 2, the "more data" route.** This repository continues [small-regulatory-dna-model](https://github.com/paulsagar7796-cmyk/small-regulatory-dna-model) (model 1), the lab's released 1.3M-parameter model of regulatory DNA activity.
 
-From [PurvoLabs](https://github.com/PurvoLabs). Nothing here is a result yet.
+From [PurvoLabs](https://github.com/PurvoLabs). There are practice numbers from one seed, but no test result yet.
 
 ## Why a second model
 
@@ -53,6 +53,18 @@ Pearson correlation between measured and predicted effect of a single-letter var
 
 On model 1's other practice measure (the saturation scan's practice half) model 1 scores 0.627.
 
+## First practice result (one seed)
+
+Pearson correlation, practice data only, one seed (20261113). Not test results.
+
+| Model | Scan practice half | Natural variants (chr 6, 13, 20) | lentiMPRA fold 9 |
+|---|---|---|---|
+| Model 1 (released) | 0.627 | 0.491 | 0.842 |
+| Control (lentiMPRA only, same removals) | 0.595 | 0.473 | 0.824 |
+| Model 2, new outputs | 0.687 | 0.573 | 0.829 |
+
+The new data clearly improves single-letter accuracy on both practice measures, with intervals of the difference from model 1 above zero. Whole-piece accuracy on lentiMPRA is slightly below model 1, but model 2 has not yet had model 1's self-distillation step. Part of the gain may come from training on the same laboratory's assay. Full record: [results/PRACTICE_RUN_1.md](results/PRACTICE_RUN_1.md).
+
 ## Status
 
 | Step | Status |
@@ -60,7 +72,8 @@ On model 1's other practice measure (the saturation scan's practice half) model 
 | Split and leak guards | Done, 14 Nov 2026 |
 | Draft pre-declaration ([predeclarations/PREDECLARATION_MORE_DATA.md](predeclarations/PREDECLARATION_MORE_DATA.md)) | Written. **Pass marks not confirmed** |
 | Reference numbers for model 1 on the practice chromosomes | Done (table above) |
-| First practice runs: model 2 and the control | Running |
+| First practice runs: model 2 and the control | Done, 14 Nov 2026 ([results/PRACTICE_RUN_1.md](results/PRACTICE_RUN_1.md)) |
+| Second seed of model 2 | Running |
 | Choose the read-out and the training recipe on practice data | To do |
 | Locked test | Only after the maintainer confirms the pass marks |
 

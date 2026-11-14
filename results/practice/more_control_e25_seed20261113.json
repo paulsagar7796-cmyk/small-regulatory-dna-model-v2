@@ -1,0 +1,185 @@
+{
+  "run": "more_control_e25_seed20261113",
+  "scan_practice_half": {
+    "split": "practice",
+    "pieces": 58,
+    "scored_backgrounds_by_cell": {
+      "HepG2": 103,
+      "K562": 81
+    },
+    "models": {
+      "student_v2": {
+        "mean_pearson": 0.6272944105130969,
+        "mean_spearman": 0.49426882900131797,
+        "HepG2": 0.6286151692778481,
+        "K562": 0.6259736517483456,
+        "shares_training_dna": 0.5909354050970821,
+        "no_shared_dna": 0.6648563813958203,
+        "mean_pearson_ci95": [
+          0.5767195957185497,
+          0.6763890067941754
+        ],
+        "minus_published_ci95": [
+          0.03309267360265532,
+          0.06714851875298142
+        ]
+      },
+      "student_v2_seed2": {
+        "mean_pearson": 0.6234142828675096,
+        "mean_spearman": 0.49469437477953004,
+        "HepG2": 0.6267351873314219,
+        "K562": 0.6200933784035972,
+        "shares_training_dna": 0.5923075985076869,
+        "no_shared_dna": 0.6552941678522958,
+        "mean_pearson_ci95": [
+          0.5707521179470683,
+          0.6738528070163952
+        ],
+        "minus_published_ci95": [
+          0.03244247678145129,
+          0.057056354775023126
+        ]
+      },
+      "published": {
+        "mean_pearson": 0.5791767511122183,
+        "mean_spearman": 0.4531038734405868,
+        "HepG2": 0.5673647256379194,
+        "K562": 0.5909887765865173,
+        "shares_training_dna": 0.5522739744112845,
+        "no_shared_dna": 0.6075184663590874,
+        "mean_pearson_ci95": [
+          0.5243460127884622,
+          0.6308665029910374
+        ]
+      },
+      "baseline": {
+        "mean_pearson": 0.3820501568699004,
+        "mean_spearman": 0.322859370138484,
+        "HepG2": 0.3832825368221308,
+        "K562": 0.38081777691767005,
+        "shares_training_dna": 0.3656505419526441,
+        "no_shared_dna": 0.3995880677057435,
+        "mean_pearson_ci95": [
+          0.34253293151523034,
+          0.4159662319445451
+        ],
+        "minus_published_ci95": [
+          -0.22740003548403467,
+          -0.16809268532782326
+        ]
+      },
+      "m2_lenti": {
+        "mean_pearson": 0.5953307973745781,
+        "mean_spearman": 0.46278607217949924,
+        "HepG2": 0.5964003039681488,
+        "K562": 0.5942612907810074,
+        "shares_training_dna": 0.5656810289423668,
+        "no_shared_dna": 0.6261204792557132,
+        "mean_pearson_ci95": [
+          0.5402553844303988,
+          0.6460587808100008
+        ],
+        "minus_published_ci95": [
+          0.003214859796824862,
+          0.030958972756205218
+        ],
+        "minus_model1_ci95": [
+          -0.05089654704292127,
+          -0.01636431117644873
+        ]
+      }
+    }
+  },
+  "natural_variants_practice_chromosomes": {
+    "student_v2": {
+      "HepG2": {
+        "activity": 0.6062707892568345,
+        "effect": 0.4961654737064283,
+        "effect_variants": 5400
+      },
+      "K562": {
+        "activity": 0.6135719412358832,
+        "effect": 0.4849543392690853,
+        "effect_variants": 5788
+      },
+      "mean_effect": 0.4905599064877568,
+      "mean_activity": 0.6099213652463589,
+      "mean_effect_minus_model1_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "student_v2_seed2": {
+      "HepG2": {
+        "activity": 0.6053239958588552,
+        "effect": 0.48992898858294587,
+        "effect_variants": 5400
+      },
+      "K562": {
+        "activity": 0.6083935523381893,
+        "effect": 0.47797568032769283,
+        "effect_variants": 5788
+      },
+      "mean_effect": 0.4839523344553194,
+      "mean_activity": 0.6068587740985223,
+      "mean_effect_minus_model1_ci95": [
+        -0.013535805606889502,
+        0.00027665859435920995
+      ]
+    },
+    "published": {
+      "HepG2": {
+        "activity": 0.5778082740790127,
+        "effect": 0.4384087592553714,
+        "effect_variants": 5400
+      },
+      "K562": {
+        "activity": 0.5894444526293595,
+        "effect": 0.47147461190005724,
+        "effect_variants": 5788
+      },
+      "mean_effect": 0.4549416855777143,
+      "mean_activity": 0.583626363354186,
+      "mean_effect_minus_model1_ci95": [
+        -0.04589217872431906,
+        -0.02488322504730548
+      ]
+    },
+    "baseline": {
+      "HepG2": {
+        "activity": 0.3904144074706671,
+        "effect": 0.32907804857883133,
+        "effect_variants": 5400
+      },
+      "K562": {
+        "activity": 0.42392186626446704,
+        "effect": 0.29681906168146965,
+        "effect_variants": 5788
+      },
+      "mean_effect": 0.3129485551301505,
+      "mean_activity": 0.40716813686756703,
+      "mean_effect_minus_model1_ci95": [
+        -0.2008344514160591,
+        -0.15474493335481598
+      ]
+    },
+    "m2_lenti": {
+      "HepG2": {
+        "activity": 0.5930948005056778,
+        "effect": 0.47754835447256266,
+        "effect_variants": 5400
+      },
+      "K562": {
+        "activity": 0.5859494406587541,
+        "effect": 0.46793046696981194,
+        "effect_variants": 5788
+      },
+      "mean_effect": 0.4727394107211873,
+      "mean_activity": 0.5895221205822159,
+      "mean_effect_minus_model1_ci95": [
+        -0.028177049614311694,
+        -0.008152247600784266
+      ]
+    }
+  }
+}
