@@ -1,0 +1,15 @@
+scan practice half   student_v2         0.6273  HepG2 0.629  K562 0.626 
+scan practice half   student_v2_seed2   0.6234  HepG2 0.627  K562 0.620 
+scan practice half   published          0.5792  HepG2 0.567  K562 0.591 
+scan practice half   baseline           0.3821  HepG2 0.383  K562 0.381 
+scan practice half   m2_lenti           0.6318  HepG2 0.633  K562 0.631 [-0.010467031166526457, 0.01887626011908451]
+scan practice half   m2_new             0.6789  HepG2 0.670  K562 0.688 [0.033634147144310844, 0.06769245879139466]
+scan practice half   m2_both            0.6780  HepG2 0.673  K562 0.683 [0.03441288249824369, 0.0650566664985173]
+natural variants     student_v2         effect 0.4906  activity 0.6099 [0.0, 0.0]
+natural variants     student_v2_seed2   effect 0.4840  activity 0.6069 [-0.013535805606889502, 0.00027665859435920995]
+natural variants     published          effect 0.4549  activity 0.5836 [-0.04589217872431906, -0.02488322504730548]
+natural variants     baseline           effect 0.3129  activity 0.4072 [-0.2008344514160591, -0.15474493335481598]
+natural variants     m2_lenti           effect 0.5222  activity 0.6347 [0.020495326400690815, 0.04284618805289335]
+natural variants     m2_new             effect 0.5733  activity 0.7785 [0.06643108289533504, 0.09942117860875739]
+natural variants     m2_both            effect 0.5718  activity 0.7591 [0.06680012747742912, 0.09599043148558341]
+fold 9 best epoch (highest mean): epoch 25, mean 0.8311764551039986, validation_element_pearson HepG2 0.8176909853235227, K562 0.8496710032799345, WTC11 0.8261673767085387
