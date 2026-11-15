@@ -1,6 +1,6 @@
 # Model 2 pre-declaration: does more training data make a better judge of single-letter changes?
 
-**Status: DRAFT** (written by Claude on 2026-11-14. The split and the leak guards below are fixed. The pass marks are proposals: the maintainer must confirm or change them before the locked chromosomes are scored. Nothing in this file is confirmed yet.)
+**Status: DRAFT** (all four pass marks were confirmed by the maintainer on 2026-11-15. The split and the leak guards are fixed. One thing is still open: which model 2 student is tested. This file becomes CONFIRMED, and the locked chromosomes are written, only after that student is fixed and recorded below.)
 
 ## The question
 Model 1 (the released student, repository `small-regulatory-dna-model`) was trained on the lentiMPRA tables only. Design changes and further self-teaching gave no more gain, and averaging our best models added almost nothing, so the remaining route is new training data. **Model 2** is the same network trained on the lentiMPRA tables plus the natural-variant MPRA table of Siraj and others (Nature 2026, Table S3). Is model 2 a better judge of single-letter changes than model 1, on variants that neither model, nor any choice we made, has seen?
@@ -27,15 +27,15 @@ Model 1 (the released student, repository `small-regulatory-dna-model`) was trai
 
 <!-- students: {"fixed": false} -->
 
-## Pass marks (set by the maintainer on 2026-11-15; marks 1, 3 and 4 as below; mark 2 given as "0.06 to 0.07 or more", ONE number still to be chosen, so this file stays a DRAFT)
+## Pass marks (CONFIRMED by the maintainer on 2026-11-15, who raised the gain mark from the proposed 0.03 to 0.06)
 | # | Test | Pass if |
 |---|---|---|
 | 1 | Better than model 1? | Model 2's mean effect correlation is higher, and the 95% interval of the difference is above zero |
-| 2 | Clearly better, not just measurably? | The difference is at least **0.06 or 0.07** (the maintainer's range; one number to be fixed before the test) |
+| 2 | Clearly better, not just measurably? | The difference is at least **0.06** |
 | 3 | No cell type given up? | In neither cell type is model 2 more than **0.01** below model 1 |
 | 4 | Stable? | The two seeds' means differ by at most **0.02** |
 
-<!-- marks: {"min_gain": null, "max_cell_deficit": 0.01, "max_seed_gap": 0.02} -->
+<!-- marks: {"min_gain": 0.06, "max_cell_deficit": 0.01, "max_seed_gap": 0.02} -->
 
 **Are the marks reachable?** Not known yet. What is known from the practice chromosomes (6, 13, 20; `results/practice/references.json`): model 1 scores 0.491 on this measure (seed 2: 0.484), the published model 0.455, the 6-letter-word baseline 0.313. The table's own standard errors put the ceiling for a perfect model near 0.91 (an estimate). Model 2's two practice runs (two seeds, new outputs, no self-teaching step) score 0.573 and 0.573 against model 1's 0.491; the 95% intervals of the difference are 0.068 to 0.098 and 0.066 to 0.099. On the saturation scan's practice half they score 0.687 and 0.679 against model 1's 0.627 (`results/PRACTICE_RUN_1.md`, `results/practice/SEED2_SUMMARY.txt`). On this practice evidence (gain about 0.082) a 0.06 mark looks reachable with some room; a 0.07 mark is close to the lower end of the practice intervals, so it could fail by chance. These are practice readings, not test results.
 
