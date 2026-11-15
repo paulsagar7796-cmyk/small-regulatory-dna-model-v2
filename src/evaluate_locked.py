@@ -54,7 +54,9 @@ def training_words() -> np.ndarray:
     return np.unique(np.concatenate(parts))
 
 
-def evaluate(table: Path, student: dict, device) -> dict:
+def evaluate(table: Path, student: dict, device, extra: dict | None = None) -> dict:
+    """extra: name -> fn(table DataFrame with chr, seq1, seq2) -> {"HepG2": (p1, p2), "K562": (p1, p2)}, the predicted
+    activity of version 1 and version 2 per variant. Extra models get the same scoring, block resamples and intervals."""
     t = pd.read_parquet(table)
     fns = models(device, {})  # student_v2 (model 1), student_v2_seed2, published, baseline
     for name, run in (("model2", student["main"]), ("model2_seed2", student["seed2"])):
@@ -64,18 +66,23 @@ def evaluate(table: Path, student: dict, device) -> dict:
     for n, fn in fns.items():
         a, b = (fn(x.reshape(-1, x.shape[-1])) for x in (x1, x2))
         pred[n] = {c: (a[c].reshape(len(t), 2).mean(1), b[c].reshape(len(t), 2).mean(1)) for c in TABLE}
+    for n, fn in (extra or {}).items():
+        assert n not in pred, f"extra model name {n} is already used"
+        out = fn(t)
+        pred[n] = {c: (np.asarray(out[c][0], dtype=float), np.asarray(out[c][1], dtype=float)) for c in TABLE}
+        assert all(len(v) == len(t) for c in TABLE for v in pred[n][c]), f"extra model {n}: wrong number of predictions"
     tw = training_words()
     fresh = ~(np.isin(words(encode(t.seq1)), tw).any(1) | np.isin(words(encode(t.seq2)), tw).any(1))
     block = (t.chr.astype(str) + ":" + (t.pos // BLOCK).astype(str)).to_numpy()
     blocks = {b: np.flatnonzero(block == b) for b in np.unique(block)}
     names, rng = list(blocks), np.random.default_rng(SETTINGS["seed"])
     draws = [np.concatenate([blocks[b] for b in rng.choice(names, len(names))]) for _ in range(N_BOOT)]
-    res, boot = {n: {} for n in fns}, {n: np.zeros(N_BOOT) for n in fns}
+    res, boot = {n: {} for n in pred}, {n: np.zeros(N_BOOT) for n in pred}
     for cell, tab in TABLE.items():
         a1, a2, skew = (t[f"{k}_{tab}"].to_numpy() for k in ("allele1.log2FC", "allele2.log2FC", "log2Skew"))
         ok = ~np.isnan(a1) & ~np.isnan(a2)
         e = ok & ~np.isnan(skew) & (np.maximum(a1, a2) >= MIN_ACTIVITY)
-        for n in fns:
+        for n in pred:
             p1, p2 = pred[n][cell]
             d = p2 - p1
             res[n][cell] = {"effect": float(np.corrcoef(skew[e], d[e])[0, 1]), "effect_variants": int(e.sum()),
@@ -86,12 +93,14 @@ def evaluate(table: Path, student: dict, device) -> dict:
             for j, dr in enumerate(draws):
                 dr = dr[e[dr]]
                 boot[n][j] += np.corrcoef(skew[dr], d[dr])[0, 1] / len(TABLE)
-    for n in fns:
+    for n in pred:
         for k in ("effect", "effect_spearman", "effect_no_shared_word", "activity"):
             res[n]["mean_" + k] = float(np.mean([res[n][c][k] for c in TABLE]))
         res[n]["mean_effect_ci95"] = [float(v) for v in np.percentile(boot[n], [2.5, 97.5])]
         res[n]["minus_model1_ci95"] = [float(v) for v in np.percentile(boot[n] - boot["student_v2"], [2.5, 97.5])]
         res[n]["minus_published_ci95"] = [float(v) for v in np.percentile(boot[n] - boot["published"], [2.5, 97.5])]
+        # model 2 minus this model, same resamples (for every model, built in or extra)
+        res[n]["model2_minus_this_ci95"] = [float(v) for v in np.percentile(boot["model2"] - boot[n], [2.5, 97.5])]
     # SK-N-SH: model 2 only (model 1 and the published model have no such output)
     sk = {}
     for name, run in (("model2", student["main"]), ("model2_seed2", student["seed2"])):
