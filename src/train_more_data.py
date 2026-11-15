@@ -15,6 +15,10 @@ practice chromosomes are not used to pick the checkpoint.
 
   --new_cells LIST   which new outputs to train (comma-separated table names; "none" = the control run:
                      lentiMPRA only, with the same pieces removed by the leak guards)
+  --pair_loss W      optional paired-effect loss (0 = off, the script then behaves exactly as before). Every step also
+                     draws --pair_batch variants at random (own random stream), builds both 200-letter versions of
+                     each with the SAME slide and the SAME strand, and adds W times the mean over new outputs of
+                     mean(((pred2 - pred1) - (y2 - y1))^2) / var(y2 - y1) to the loss, over pairs with both labels.
   --teachers PATHS   model 1's second step, applied to model 2: comma-separated best.pt files of trained
                      copies of this same model. The student then also learns their averaged prediction for
                      ALL outputs, on every piece and on a copy of it with --mut of its letters swapped
@@ -58,6 +62,24 @@ def between_adapters(seqs: pd.Series) -> np.ndarray:
     return np.concatenate([l, c, r], axis=1)
 
 
+def shift_by(c: torch.Tensor, s: torch.Tensor, flank: torch.Tensor) -> torch.Tensor:
+    """flank_shift with the slide given: row i slides s[i] letters (s has shape (n, 1)). Used so that the two versions
+    of a variant slide by the same amount."""
+    ext = torch.cat([c, flank[: int(s.max())].expand(len(c), -1)], dim=1)
+    return ext.gather(1, torch.arange(c.shape[1])[None, :] + s)
+
+
+def draw_pairs(x_tr: torch.Tensor, first: int, n_var: int, n: int, shift: int, flank: torch.Tensor, pgen: torch.Generator):
+    """n random variants: (versions 1 then versions 2 as one (2n, length) tensor, row ids of version 1, row ids of version 2).
+    Both versions of a variant slide by the same random amount."""
+    pv = torch.randint(0, n_var, (n,), generator=pgen)
+    p1, p2 = first + pv, first + n_var + pv
+    pc = x_tr[torch.cat([p1, p2])]
+    if shift:
+        pc = shift_by(pc, torch.randint(0, shift + 1, (n, 1), generator=pgen).repeat(2, 1), flank)
+    return pc, p1, p2
+
+
 def both_orientations(model, seqs: pd.Series, device) -> np.ndarray:
     """(n, outputs): the piece between the adapters, and inserted the other way round, averaged (model 1's recipe)."""
     c = encode(seqs)
@@ -90,14 +112,19 @@ def main() -> None:
     ap.add_argument("--teachers", default="", help="comma-separated best.pt files of trained copies (self-distillation)")
     ap.add_argument("--lam", type=float, default=1.0, help="weight of the teacher targets against the lab labels")
     ap.add_argument("--mut", type=float, default=0.05, help="share of letters swapped in the changed copies (0 = no copies)")
+    ap.add_argument("--pair_loss", type=float, default=0.0, help="weight of the paired-effect loss (0 = off)")
+    ap.add_argument("--pair_batch", type=int, default=256, help="variants drawn per step for the paired-effect loss")
     ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only")
     ap.add_argument("--tag", default="")
     args = ap.parse_args()
     new_cells = [] if args.new_cells == "none" else args.new_cells.split(",")
     n_out = len(CELLS) + len(new_cells)
     teacher_paths = [t for t in args.teachers.split(",") if t]
+    if args.pair_loss > 0:
+        assert new_cells, "--pair_loss needs new outputs (the variant table)"
     name = f"more_{'-'.join(new_cells) if new_cells else 'control'}" \
-           + (f"_distill_t{len(teacher_paths)}_lam{args.lam}_mut{args.mut}" if teacher_paths else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}"
+           + (f"_distill_t{len(teacher_paths)}_lam{args.lam}_mut{args.mut}" if teacher_paths else "") \
+           + (f"_pair{args.pair_loss}" if args.pair_loss > 0 else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}"
     run_dir = Path(RUNS) / name
     run_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
@@ -133,10 +160,17 @@ def main() -> None:
                 y[:, len(CELLS) + j] = nt[f"{a}.log2FC_{cell}"].to_numpy()
             labels.append(y)
         new_rows = 2 * len(nt)
+    n_var = new_rows // 2  # version 1 of variant j is row lenti_rows + j, version 2 is row lenti_rows + n_var + j
     x_tr = torch.from_numpy(np.concatenate(x))
     y_raw = np.concatenate(labels)
     mean, std = np.nanmean(y_raw, axis=0), np.nanstd(y_raw, axis=0)
     y_tr = torch.from_numpy((y_raw - mean) / std)
+    pair_var = None
+    if args.pair_loss > 0:  # variance of (version 2 minus version 1) per new output, over the whole training table, normalised units
+        d = (y_tr[lenti_rows + n_var :, len(CELLS):] - y_tr[lenti_rows : lenti_rows + n_var, len(CELLS):]).numpy()
+        pair_var = torch.from_numpy(np.nanvar(d, axis=0)).float()
+        print("variance of the paired difference per new output (normalised units): " + ", ".join(f"{v:.3f}" for v in pair_var), flush=True)
+        pgen = torch.Generator().manual_seed(args.seed + 7919)  # its own stream: the main batches are unchanged
 
     val = {c: everything[c][everything[c].fold == VALIDATION_FOLD].reset_index(drop=True) for c in CELLS}
     x_val = {c: torch.from_numpy(encode(val[c].seq)) for c in CELLS}
@@ -180,7 +214,7 @@ def main() -> None:
     gen = torch.Generator().manual_seed(args.seed)
     log, best, t0, step = [], -1.0, time.time(), 0
     for epoch in range(1, args.epochs + 1):
-        order, losses = torch.randperm(len(x_tr), generator=gen), []
+        order, losses, pair_losses = torch.randperm(len(x_tr), generator=gen), [], []
         for i in range(0, len(order), args.batch):
             idx = order[i : i + args.batch]
             c = x_tr[idx]
@@ -188,14 +222,33 @@ def main() -> None:
                 c = flank_shift(c, args.shift, flank, gen)
             if teachers and args.mut:
                 c = torch.cat([c, mutate(c, args.mut, gen)])
-            c, target = c.to(device), y_tr[idx].to(device)
-            if torch.rand(1, generator=gen).item() < 0.5:
+            target = y_tr[idx]
+            if pair_var is not None:  # both versions of --pair_batch random variants, same slide, appended to the batch
+                pc, p1, p2 = draw_pairs(x_tr, lenti_rows, n_var, args.pair_batch, args.shift, flank, pgen)
+                n_main = len(c)
+                c = torch.cat([c, pc])
+                target = torch.cat([target, y_tr[torch.cat([p1, p2])]])
+            c, target = c.to(device), target.to(device)
+            if torch.rand(1, generator=gen).item() < 0.5:  # one strand for the whole batch, so also for both versions of a pair
                 c = reverse_complement_codes(c)
             pred = model(onehot(c))
+            # label loss rows: the usual batch, then (if on) the paired rows; mutated copies (if any) sit in between and have no labels
+            lab = torch.cat([torch.arange(len(idx)), n_main + torch.arange(2 * args.pair_batch)]).to(device) if pair_var is not None \
+                else torch.arange(len(idx), device=device)
             seen = ~torch.isnan(target)
-            err = torch.where(seen, (pred[: len(idx)] - torch.nan_to_num(target)) ** 2, torch.zeros_like(target))
+            err = torch.where(seen, (pred[lab] - torch.nan_to_num(target)) ** 2, torch.zeros_like(target))
             n = seen.sum(0)
             loss = (err.sum(0)[n > 0] / n[n > 0]).mean()  # mean per output over its measured rows, then over outputs
+            if pair_var is not None:
+                ppred = pred[n_main:, len(CELLS):]
+                dp = ppred[args.pair_batch:] - ppred[: args.pair_batch]
+                yp = target[len(idx):, len(CELLS):]
+                dy = yp[args.pair_batch:] - yp[: args.pair_batch]
+                ok = ~torch.isnan(dy)
+                per = (torch.where(ok, (dp - torch.nan_to_num(dy)) ** 2, torch.zeros_like(dy)).sum(0)) / ok.sum(0).clamp(min=1) / pair_var.to(device)
+                pair_term = per[ok.sum(0) > 0].mean() if ok.any() else loss.new_zeros(())
+                pair_losses.append(pair_term.item())
+                loss = loss + args.pair_loss * pair_term
             if teachers:  # the teachers' averaged prediction, all outputs, pieces and changed copies
                 loss = loss + args.lam * torch.nn.functional.mse_loss(pred, teach(c))
             opt.zero_grad()
@@ -212,9 +265,11 @@ def main() -> None:
         entry = {"epoch": epoch, "train_loss": float(np.mean(losses)), "validation_element_pearson": r, "mean": mean_r}
         if epoch % 5 == 0 or epoch == args.epochs or args.max_steps:  # the new practice chromosomes: logged, not used for choices here
             entry["practice_variants"] = practice_readout(both_orientations(model, pr.seq1, device), both_orientations(model, pr.seq2, device), pr, readout)
+        if pair_var is not None:
+            entry["pair_loss"] = float(np.mean(pair_losses))
         entry["minutes"] = (time.time() - t0) / 60
         log.append(entry)
-        print(f"  epoch {epoch:>2}: loss {entry['train_loss']:.4f}, fold 9 " + ", ".join(f"{c} {v:.3f}" for c, v in r.items())
+        print(f"  epoch {epoch:>2}: loss {entry['train_loss']:.4f}" + (f" (pair term {entry['pair_loss']:.4f})" if "pair_loss" in entry else "") + ", fold 9 " + ", ".join(f"{c} {v:.3f}" for c, v in r.items())
               + f", mean {mean_r:.3f}" + ("; practice variants " + ", ".join(f"{k} act {v['activity']:.3f} eff {v['effect']:.3f}"
                                           for k, v in entry["practice_variants"].items()) if "practice_variants" in entry else "")
               + f", {entry['minutes']:.1f} min", flush=True)
