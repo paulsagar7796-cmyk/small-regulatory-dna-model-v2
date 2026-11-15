@@ -1,0 +1,16 @@
+note: the v1 student's checkpoint is not present; it is left out
+note: the v1 student's checkpoint is not present; it is left out
+scan practice half   student_v2         0.6273  HepG2 0.629  K562 0.626 
+scan practice half   student_v2_seed2   0.6234  HepG2 0.627  K562 0.620 
+scan practice half   published          0.5792  HepG2 0.567  K562 0.591 
+scan practice half   baseline           0.3821  HepG2 0.383  K562 0.381 
+scan practice half   m2_lenti           0.6496  HepG2 0.651  K562 0.648 [0.007233656801560357, 0.035936536508210846]
+scan practice half   m2_new             0.6985  HepG2 0.691  K562 0.706 [0.05754212782767265, 0.08550292217096361]
+scan practice half   m2_both            0.6969  HepG2 0.694  K562 0.700 [0.05675935787570745, 0.08286548131229238]
+natural variants     student_v2         effect 0.4906  activity 0.6099 [0.0, 0.0]
+natural variants     student_v2_seed2   effect 0.4840  activity 0.6069 [-0.013535805606889502, 0.00027665859435920995]
+natural variants     published          effect 0.4549  activity 0.5836 [-0.04589217872431906, -0.02488322504730548]
+natural variants     baseline           effect 0.3129  activity 0.4072 [-0.2008344514160591, -0.15474493335481598]
+natural variants     m2_lenti           effect 0.5252  activity 0.6352 [0.024807306541446094, 0.044657870752335405]
+natural variants     m2_new             effect 0.5838  activity 0.7906 [0.07842066317032984, 0.1088990398154768]
+natural variants     m2_both            effect 0.5800  activity 0.7663 [0.07617244188854003, 0.10249758468175961]

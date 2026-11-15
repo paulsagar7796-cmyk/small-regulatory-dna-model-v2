@@ -1,0 +1,241 @@
+{
+  "variants": 28104,
+  "blocks": 2658,
+  "models": {
+    "student_v2": {
+      "HepG2": {
+        "effect": 0.4961654737064283,
+        "effect_variants": 5400,
+        "effect_spearman": 0.4013424952146118,
+        "effect_no_shared_word": 0.5034411336964164,
+        "no_shared_word_variants": 3404,
+        "activity": 0.6062707892568345
+      },
+      "K562": {
+        "effect": 0.4849543392690853,
+        "effect_variants": 5788,
+        "effect_spearman": 0.39311640256831454,
+        "effect_no_shared_word": 0.46882189928586343,
+        "no_shared_word_variants": 3492,
+        "activity": 0.6135719412358832
+      },
+      "mean_effect": 0.4905599064877568,
+      "mean_effect_spearman": 0.39722944889146317,
+      "mean_effect_no_shared_word": 0.48613151649113995,
+      "mean_activity": 0.6099213652463589,
+      "mean_effect_ci95": [
+        0.4579855235618477,
+        0.5219678226071516
+      ],
+      "minus_model1_ci95": [
+        0.0,
+        0.0
+      ],
+      "minus_published_ci95": [
+        0.024883225047305467,
+        0.04589217872431906
+      ]
+    },
+    "student_v2_seed2": {
+      "HepG2": {
+        "effect": 0.48992898858294587,
+        "effect_variants": 5400,
+        "effect_spearman": 0.39855656037562937,
+        "effect_no_shared_word": 0.4978319216673232,
+        "no_shared_word_variants": 3404,
+        "activity": 0.6053239958588552
+      },
+      "K562": {
+        "effect": 0.47797568032769283,
+        "effect_variants": 5788,
+        "effect_spearman": 0.39274918309370127,
+        "effect_no_shared_word": 0.46669630194415135,
+        "no_shared_word_variants": 3492,
+        "activity": 0.6083935523381893
+      },
+      "mean_effect": 0.4839523344553194,
+      "mean_effect_spearman": 0.39565287173466535,
+      "mean_effect_no_shared_word": 0.48226411180573725,
+      "mean_activity": 0.6068587740985223,
+      "mean_effect_ci95": [
+        0.45099211352019514,
+        0.516021427765048
+      ],
+      "minus_model1_ci95": [
+        -0.013535805606889502,
+        0.00027665859435920995
+      ],
+      "minus_published_ci95": [
+        0.017852229019904107,
+        0.03936652553325242
+      ]
+    },
+    "published": {
+      "HepG2": {
+        "effect": 0.4384087592553714,
+        "effect_variants": 5400,
+        "effect_spearman": 0.3398470896914487,
+        "effect_no_shared_word": 0.45654850471634995,
+        "no_shared_word_variants": 3404,
+        "activity": 0.5778082740790127
+      },
+      "K562": {
+        "effect": 0.47147461190005724,
+        "effect_variants": 5788,
+        "effect_spearman": 0.37064778942829074,
+        "effect_no_shared_word": 0.46544126974248573,
+        "no_shared_word_variants": 3492,
+        "activity": 0.5894444526293595
+      },
+      "mean_effect": 0.4549416855777143,
+      "mean_effect_spearman": 0.3552474395598697,
+      "mean_effect_no_shared_word": 0.46099488722941784,
+      "mean_activity": 0.583626363354186,
+      "mean_effect_ci95": [
+        0.42391792036453985,
+        0.4859430211051369
+      ],
+      "minus_model1_ci95": [
+        -0.04589217872431906,
+        -0.02488322504730548
+      ],
+      "minus_published_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "baseline": {
+      "HepG2": {
+        "effect": 0.32907804857883133,
+        "effect_variants": 5400,
+        "effect_spearman": 0.2701144172822242,
+        "effect_no_shared_word": 0.3312781980974575,
+        "no_shared_word_variants": 3404,
+        "activity": 0.3904144074706671
+      },
+      "K562": {
+        "effect": 0.29681906168146965,
+        "effect_variants": 5788,
+        "effect_spearman": 0.2550491312362562,
+        "effect_no_shared_word": 0.28891921912090024,
+        "no_shared_word_variants": 3492,
+        "activity": 0.42392186626446704
+      },
+      "mean_effect": 0.3129485551301505,
+      "mean_effect_spearman": 0.26258177425924023,
+      "mean_effect_no_shared_word": 0.3100987086091789,
+      "mean_activity": 0.40716813686756703,
+      "mean_effect_ci95": [
+        0.28279256680635323,
+        0.3416090459183678
+      ],
+      "minus_model1_ci95": [
+        -0.2008344514160591,
+        -0.15474493335481598
+      ],
+      "minus_published_ci95": [
+        -0.16448790412331518,
+        -0.1202615560951964
+      ]
+    },
+    "model2": {
+      "HepG2": {
+        "effect": 0.5816705228086244,
+        "effect_variants": 5400,
+        "effect_spearman": 0.5069413760669377,
+        "effect_no_shared_word": 0.5783305627012241,
+        "no_shared_word_variants": 3404,
+        "activity": 0.7913857029563885
+      },
+      "K562": {
+        "effect": 0.5859700869467904,
+        "effect_variants": 5788,
+        "effect_spearman": 0.5133313721969835,
+        "effect_no_shared_word": 0.5630153559829993,
+        "no_shared_word_variants": 3492,
+        "activity": 0.7898634856015192
+      },
+      "mean_effect": 0.5838203048777074,
+      "mean_effect_spearman": 0.5101363741319607,
+      "mean_effect_no_shared_word": 0.5706729593421117,
+      "mean_activity": 0.7906245942789538,
+      "mean_effect_ci95": [
+        0.551132941899332,
+        0.6139653386497361
+      ],
+      "minus_model1_ci95": [
+        0.07842066317032984,
+        0.1088990398154768
+      ],
+      "minus_published_ci95": [
+        0.11278930954784167,
+        0.14620207026348014
+      ]
+    },
+    "model2_seed2": {
+      "HepG2": {
+        "effect": 0.5826414666472393,
+        "effect_variants": 5400,
+        "effect_spearman": 0.505575023863371,
+        "effect_no_shared_word": 0.5765037602951997,
+        "no_shared_word_variants": 3404,
+        "activity": 0.7932817201370248
+      },
+      "K562": {
+        "effect": 0.5860951266262027,
+        "effect_variants": 5788,
+        "effect_spearman": 0.5090194860102465,
+        "effect_no_shared_word": 0.5633247079640107,
+        "no_shared_word_variants": 3492,
+        "activity": 0.7917527154476909
+      },
+      "mean_effect": 0.584368296636721,
+      "mean_effect_spearman": 0.5072972549368088,
+      "mean_effect_no_shared_word": 0.5699142341296052,
+      "mean_activity": 0.7925172177923578,
+      "mean_effect_ci95": [
+        0.5515998507949246,
+        0.6141763711643827
+      ],
+      "minus_model1_ci95": [
+        0.07848558200728585,
+        0.10983337733856802
+      ],
+      "minus_published_ci95": [
+        0.11291580641227647,
+        0.14737333289948476
+      ]
+    }
+  },
+  "SKNSH": {
+    "model2": {
+      "effect": 0.5247033070494818,
+      "effect_variants": 5432
+    },
+    "model2_seed2": {
+      "effect": 0.5245742473604451,
+      "effect_variants": 5432
+    }
+  },
+  "student": {
+    "main": "more_HEPG2-K562-SKNSH-HCT116-A549_distill_t3_lam1.0_mut0.05_e25_seed20261113",
+    "seed2": "more_HEPG2-K562-SKNSH-HCT116-A549_distill_t3_lam1.0_mut0.05_e25_seed2"
+  },
+  "marks": {
+    "min_gain": 0.06,
+    "max_cell_deficit": 0.01,
+    "max_seed_gap": 0.02
+  },
+  "verdict": {
+    "gain": 0.0932603983899506,
+    "largest_cell_deficit": -0.08550504910219614,
+    "seed_gap": 0.0005479917590135441,
+    "marks": {
+      "1_ci_above_zero": true,
+      "2_min_gain": true,
+      "3_cell_deficit": true,
+      "4_seed_gap": true
+    },
+    "pass": true
+  }
+}

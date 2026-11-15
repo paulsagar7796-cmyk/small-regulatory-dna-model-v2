@@ -1,6 +1,6 @@
 # Model 2 pre-declaration: does more training data make a better judge of single-letter changes?
 
-**Status: DRAFT** (all four pass marks were confirmed by the maintainer on 2026-11-15. The split and the leak guards are fixed. One thing is still open: which model 2 student is tested. This file becomes CONFIRMED, and the locked chromosomes are written, only after that student is fixed and recorded below.)
+**Status: CONFIRMED** (2026-11-15. The maintainer confirmed all four pass marks and raised the gain mark from the proposed 0.03 to 0.06. The student below was then fixed on practice data only. The locked chromosomes were written and scored after the commit that contains this line.)
 
 ## The question
 Model 1 (the released student, repository `small-regulatory-dna-model`) was trained on the lentiMPRA tables only. Design changes and further self-teaching gave no more gain, and averaging our best models added almost nothing, so the remaining route is new training data. **Model 2** is the same network trained on the lentiMPRA tables plus the natural-variant MPRA table of Siraj and others (Nature 2026, Table S3). Is model 2 a better judge of single-letter changes than model 1, on variants that neither model, nor any choice we made, has seen?
@@ -25,7 +25,10 @@ Model 1 (the released student, repository `small-regulatory-dna-model`) was trai
 - **Compared with:** model 1 (main seed), run on exactly the same variants. Also reported: published MPRA-LegNet, the 6-letter-word baseline, model 2's second seed.
 - **Which read-out of model 2:** its **new outputs** (the HepG2 and K562 outputs trained on the natural-variant table). Chosen on 2026-11-15 on practice data only, with two seeds: effect correlation on the practice chromosomes 0.573 / 0.573 for the new outputs, 0.570 / 0.572 for both averaged, 0.511 / 0.522 for the lentiMPRA outputs.
 
-<!-- students: {"fixed": false} -->
+## The student tested (fixed on 2026-11-15, on practice data only)
+Model 2 **with model 1's second training step**: one student taught by three trained copies of model 2 (seeds 20261113, 2, 3), `src/train_more_data.py --teachers`. Main seed 20261113, second seed 2; read through the new outputs. Practice evidence for the choice (taught against untaught): practice chromosomes 0.584 / 0.584 against 0.573; scan practice half 0.699 / 0.696 against 0.679 to 0.687; lentiMPRA fold 9 0.844 / 0.840 against 0.829 to 0.831. The test script (`src/evaluate_locked.py`) was checked on the practice chromosomes, where it reproduces 0.584.
+
+<!-- students: {"fixed": true, "main": "more_HEPG2-K562-SKNSH-HCT116-A549_distill_t3_lam1.0_mut0.05_e25_seed20261113", "seed2": "more_HEPG2-K562-SKNSH-HCT116-A549_distill_t3_lam1.0_mut0.05_e25_seed2"} -->
 
 ## Pass marks (CONFIRMED by the maintainer on 2026-11-15, who raised the gain mark from the proposed 0.03 to 0.06)
 | # | Test | Pass if |
