@@ -1,0 +1,17 @@
+{
+  "variants": 3380,
+  "positives": 338,
+  "random_auprc": 0.1,
+  "centre_letter_matches": 3380,
+  "primary_window_with_N": 0,
+  "models": {
+    "CADD (check)": {
+      "pooled_auprc": 0.6940837189931337,
+      "pooled_ci95": [
+        0.6534163923826772,
+        0.7395102702805172
+      ],
+      "chrom_weighted_auprc": 0.7121847808331816
+    }
+  }
+}
