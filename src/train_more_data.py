@@ -19,6 +19,15 @@ practice chromosomes are not used to pick the checkpoint.
                      draws --pair_batch variants at random (own random stream), builds both 200-letter versions of
                      each with the SAME slide and the SAME strand, and adds W times the mean over new outputs of
                      mean(((pred2 - pred1) - (y2 - y1))^2) / var(y2 - y1) to the loss, over pairs with both labels.
+  --extra_table PATH extra single training pieces (data/more_data/train_gosai_extra.parquet, made by src/prepare_gosai_extra.py:
+                     pieces of Table S2 of Gosai and others that the natural-variant table does not have). They are added as
+                     ordinary single rows (not pairs) after the variant rows, with labels only at the outputs the table has
+                     (HEPG2, K562, SKNSH; HCT116 and A549 are masked, so these rows add no loss and no gradient there).
+                     An epoch still covers every row once, so with the extra rows it has more steps (and the one-cycle
+                     schedule is stretched to match). The label scaling (mean and standard deviation per output) is still
+                     computed from the rows WITHOUT the extra table, so the output units equal those of earlier runs and
+                     earlier teachers still pass the scaling check. The run name gets the suffix _gosai. Without the option
+                     nothing changes (same name, same batches).
   --teachers PATHS   model 1's second step, applied to model 2: comma-separated best.pt files of trained
                      copies of this same model. The student then also learns their averaged prediction for
                      ALL outputs, on every piece and on a copy of it with --mut of its letters swapped
@@ -100,6 +109,15 @@ def practice_readout(pred1: np.ndarray, pred2: np.ndarray, pr: pd.DataFrame, col
     return out
 
 
+def masked_mse(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    """Mean per output over its measured rows (NaN target = not measured), then the mean over outputs that have at least one
+    measured row. An output with no measured row in the batch gets no loss and no gradient. pred and target: (rows, outputs)."""
+    seen = ~torch.isnan(target)
+    err = torch.where(seen, (pred - torch.nan_to_num(target)) ** 2, torch.zeros_like(target))
+    n = seen.sum(0)
+    return (err.sum(0)[n > 0] / n[n > 0]).mean()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--new_cells", default=",".join(NEW_CELLS))
@@ -114,6 +132,7 @@ def main() -> None:
     ap.add_argument("--mut", type=float, default=0.05, help="share of letters swapped in the changed copies (0 = no copies)")
     ap.add_argument("--pair_loss", type=float, default=0.0, help="weight of the paired-effect loss (0 = off)")
     ap.add_argument("--pair_batch", type=int, default=256, help="variants drawn per step for the paired-effect loss")
+    ap.add_argument("--extra_table", default="", help="parquet of extra single pieces (see the docstring); empty = off")
     ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only")
     ap.add_argument("--tag", default="")
     args = ap.parse_args()
@@ -122,9 +141,11 @@ def main() -> None:
     teacher_paths = [t for t in args.teachers.split(",") if t]
     if args.pair_loss > 0:
         assert new_cells, "--pair_loss needs new outputs (the variant table)"
+    if args.extra_table:
+        assert new_cells, "--extra_table needs new outputs (the variant table)"
     name = f"more_{'-'.join(new_cells) if new_cells else 'control'}" \
            + (f"_distill_t{len(teacher_paths)}_lam{args.lam}_mut{args.mut}" if teacher_paths else "") \
-           + (f"_pair{args.pair_loss}" if args.pair_loss > 0 else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}"
+           + (f"_pair{args.pair_loss}" if args.pair_loss > 0 else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}" + ("_gosai" if args.extra_table else "")
     run_dir = Path(RUNS) / name
     run_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
@@ -161,13 +182,23 @@ def main() -> None:
             labels.append(y)
         new_rows = 2 * len(nt)
     n_var = new_rows // 2  # version 1 of variant j is row lenti_rows + j, version 2 is row lenti_rows + n_var + j
-    x_tr = torch.from_numpy(np.concatenate(x))
     y_raw = np.concatenate(labels)
-    mean, std = np.nanmean(y_raw, axis=0), np.nanstd(y_raw, axis=0)
+    mean, std = np.nanmean(y_raw, axis=0), np.nanstd(y_raw, axis=0)  # from the lentiMPRA and variant rows only, also when --extra_table is given
+    extra_rows = 0
+    if args.extra_table:  # single pieces after the variant rows (the paired-loss row ids above stay valid); HCT116 and A549 stay NaN
+        ex = pd.read_parquet(args.extra_table)
+        x.append(between_adapters(ex.seq))
+        y_ex = np.full((len(ex), n_out), np.nan, dtype=np.float32)
+        for j, cell in enumerate(new_cells):
+            if f"log2FC_{cell}" in ex.columns:
+                y_ex[:, len(CELLS) + j] = ex[f"log2FC_{cell}"].to_numpy()
+        y_raw = np.concatenate([y_raw, y_ex])
+        extra_rows = len(ex)
+    x_tr = torch.from_numpy(np.concatenate(x))
     y_tr = torch.from_numpy((y_raw - mean) / std)
     pair_var = None
     if args.pair_loss > 0:  # variance of (version 2 minus version 1) per new output, over the whole training table, normalised units
-        d = (y_tr[lenti_rows + n_var :, len(CELLS):] - y_tr[lenti_rows : lenti_rows + n_var, len(CELLS):]).numpy()
+        d = (y_tr[lenti_rows + n_var : lenti_rows + 2 * n_var, len(CELLS):] - y_tr[lenti_rows : lenti_rows + n_var, len(CELLS):]).numpy()
         pair_var = torch.from_numpy(np.nanvar(d, axis=0)).float()
         print("variance of the paired difference per new output (normalised units): " + ", ".join(f"{v:.3f}" for v in pair_var), flush=True)
         pgen = torch.Generator().manual_seed(args.seed + 7919)  # its own stream: the main batches are unchanged
@@ -206,10 +237,11 @@ def main() -> None:
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=args.epochs * steps_per_epoch,
                                                 pct_start=0.3, three_phase=False, cycle_momentum=False)
     config = {**vars(args), "outputs": CELLS + [f"new_{c}" for c in new_cells], "parameters": count_parameters(model),
-              "lentimpra_rows": lenti_rows, "new_rows": new_rows, "lentimpra_rows_removed_by_new_guard": int(sum(
+              "lentimpra_rows": lenti_rows, "new_rows": new_rows, "extra_rows": extra_rows, "lentimpra_rows_removed_by_new_guard": int(sum(
                   (everything[c].fold.isin(TRAIN_FOLDS) & everything[c].seq.isin(excluded)).sum() for c in CELLS)),
               "label_mean": mean.tolist(), "label_std": std.tolist()}
-    print(f"{name}: {config['parameters']:,} parameters; {lenti_rows:,} lentiMPRA rows + {new_rows:,} new rows; "
+    print(f"{name}: {config['parameters']:,} parameters; {lenti_rows:,} lentiMPRA rows + {new_rows:,} new rows"
+          + (f" + {extra_rows:,} extra rows" if args.extra_table else "") + f"; {steps_per_epoch:,} steps per epoch; "
           f"{n_out} outputs; device {device}", flush=True)
     gen = torch.Generator().manual_seed(args.seed)
     log, best, t0, step = [], -1.0, time.time(), 0
@@ -235,10 +267,7 @@ def main() -> None:
             # label loss rows: the usual batch, then (if on) the paired rows; mutated copies (if any) sit in between and have no labels
             lab = torch.cat([torch.arange(len(idx)), n_main + torch.arange(2 * args.pair_batch)]).to(device) if pair_var is not None \
                 else torch.arange(len(idx), device=device)
-            seen = ~torch.isnan(target)
-            err = torch.where(seen, (pred[lab] - torch.nan_to_num(target)) ** 2, torch.zeros_like(target))
-            n = seen.sum(0)
-            loss = (err.sum(0)[n > 0] / n[n > 0]).mean()  # mean per output over its measured rows, then over outputs
+            loss = masked_mse(pred[lab], target)  # mean per output over its measured rows, then over outputs
             if pair_var is not None:
                 ppred = pred[n_main:, len(CELLS):]
                 dp = ppred[args.pair_batch:] - ppred[: args.pair_batch]

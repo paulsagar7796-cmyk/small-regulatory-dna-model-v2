@@ -1,0 +1,314 @@
+{
+ "rows_with_duplicate_ids": 8,
+ "chromosome_question": {
+  "ids_without_a_chromosome_or_chromosome_not_1_22_X_Y": 0,
+  "id_chromosome_differs_from_chr_column": 0,
+  "id_shapes_all_rows": {
+   "5 colons, 1 tokens": 705631,
+   "6 colons, 1 tokens": 62496,
+   "3 colons, 1 tokens": 14464,
+   "11 colons, 2 tokens": 10454,
+   "12 colons, 2 tokens": 2646,
+   "17 colons, 3 tokens": 1500,
+   "18 colons, 3 tokens": 373,
+   "23 colons, 4 tokens": 254,
+   "24 colons, 4 tokens": 79,
+   "29 colons, 5 tokens": 56,
+   "10 colons, 2 tokens": 45,
+   "35 colons, 6 tokens": 18,
+   "30 colons, 5 tokens": 16,
+   "36 colons, 6 tokens": 9,
+   "47 colons, 8 tokens": 8,
+   "41 colons, 7 tokens": 5,
+   "42 colons, 7 tokens": 3,
+   "16 colons, 3 tokens": 2,
+   "60 colons, 10 tokens": 1,
+   "71 colons, 12 tokens": 1,
+   "65 colons, 11 tokens": 1,
+   "72 colons, 12 tokens": 1,
+   "48 colons, 8 tokens": 1
+  },
+  "examples_of_ids_per_shape": {
+   "10 colons, 2 tokens": [
+    "2:23877565:TTG:T:R:wC,2:23877566:T:G:R:wC",
+    "17:42186129:AC:A:R:wC,17:42186130:C:A:R:wC"
+   ],
+   "11 colons, 2 tokens": [
+    "10:79680514:C:A:A:wC,10:79680514:C:A:A:wC:Alt_10-79680434-R",
+    "10:79680514:C:A:R:wC,10:79680514:C:A:R:wC:Alt_10-79680434-R"
+   ],
+   "12 colons, 2 tokens": [
+    "6:22930460:A:C:R:wL:Alt_6-22930522-R,6:22930460:A:C:R:wL:Alt_6-22930552-R",
+    "6:22930460:A:C:A:wL:Alt_6-22930522-R,6:22930460:A:C:A:wL:Alt_6-22930552-R"
+   ],
+   "16 colons, 3 tokens": [
+    "6:16753373:CAACA:C:R:wC,6:16753374:AAC:A:R:wC,6:16753374:AAC:A:R:wC:Alt_6-16753378-R",
+    "4:38653772:TA:T:R:wC,4:38653773:A:T:R:wC,4:38653773:A:T:R:wC:Alt_4-38653770-R"
+   ],
+   "17 colons, 3 tokens": [
+    "3:5257981:T:A:A:wC,3:5257981:T:A:A:wC:Alt_3-5257971-R,3:5257981:T:A:A:wC:Alt_3-5257975-R",
+    "3:5257981:T:A:R:wC,3:5257981:T:A:R:wC:Alt_3-5257971-R,3:5257981:T:A:R:wC:Alt_3-5257975-R"
+   ],
+   "18 colons, 3 tokens": [
+    "19:55697766:T:A:A:wR:Alt_19-55697712-R,19:55697766:T:A:A:wR:Alt_19-55697752-R,19:55697766:T:A:A:wR:Alt_19-55697795-R",
+    "19:55697766:T:A:R:wR:Alt_19-55697712-R,19:55697766:T:A:R:wR:Alt_19-55697752-R,19:55697766:T:A:R:wR:Alt_19-55697795-R"
+   ],
+   "23 colons, 4 tokens": [
+    "19:57678258:C:T:A:wC,19:57678258:C:T:A:wC:Alt_19-57678194-R,19:57678258:C:T:A:wC:Alt_19-57678212-R,19:57678258:C:T:A:wC:Alt_19-57678336-R",
+    "19:57678258:C:T:R:wC,19:57678258:C:T:R:wC:Alt_19-57678194-R,19:57678258:C:T:R:wC:Alt_19-57678212-R,19:57678258:C:T:R:wC:Alt_19-57678336-R"
+   ],
+   "24 colons, 4 tokens": [
+    "22:43549652:C:T:R:wL:Alt_22-43549637-R,22:43549652:C:T:R:wL:Alt_22-43549646-R,22:43549652:C:T:R:wL:Alt_22-43549648-R,22:43549652:C:T:R:wL:Alt_22-43549649-R",
+    "22:43549652:C:T:A:wL:Alt_22-43549637-R,22:43549652:C:T:A:wL:Alt_22-43549646-R,22:43549652:C:T:A:wL:Alt_22-43549648-R,22:43549652:C:T:A:wL:Alt_22-43549649-R"
+   ],
+   "29 colons, 5 tokens": [
+    "4:186580675:G:A:A:wC,4:186580675:G:A:A:wC:Alt_4-186580601-R,4:186580675:G:A:A:wC:Alt_4-186580604-R,4:186580675:G:A:A:wC:Alt_4-186580610-R,4:186580675:G:A:A:wC:Alt_4-186580657-R",
+    "4:186580675:G:A:R:wC,4:186580675:G:A:R:wC:Alt_4-186580601-R,4:186580675:G:A:R:wC:Alt_4-186580604-R,4:186580675:G:A:R:wC:Alt_4-186580610-R,4:186580675:G:A:R:wC:Alt_4-186580657-R"
+   ],
+   "3 colons, 1 tokens": [
+    "4:94798229:NA:NA",
+    "5:113648648:NA:NA"
+   ],
+   "30 colons, 5 tokens": [
+    "11:103870637:T:TTGA:A:wL:Alt_11-103870621-R,11:103870637:T:TTGA:A:wL:Alt_11-103870640-R,11:103870637:T:TTGA:A:wL:Alt_11-103870641-R,11:103870637:T:TTGA:A:wL:Alt_11-103870755-R,11:103870637:T:TTGA:A:wL:Alt_11-103870761-R",
+    "11:103870638:C:CA:A:wL:Alt_11-103870621-R,11:103870638:C:CA:A:wL:Alt_11-103870640-R,11:103870638:C:CA:A:wL:Alt_11-103870641-R,11:103870638:C:CA:A:wL:Alt_11-103870755-R,11:103870638:C:CA:A:wL:Alt_11-103870761-R"
+   ],
+   "35 colons, 6 tokens": [
+    "19:46974752:G:C:R:wC,19:46974752:G:C:R:wC:Alt_19-46974678-R,19:46974752:G:C:R:wC:Alt_19-46974728-R,19:46974752:G:C:R:wC:Alt_19-46974748-R,19:46974752:G:C:R:wC:Alt_19-46974762-R,19:46974752:G:C:R:wC:Alt_19-46974781-R",
+    "17:41438720:T:C:A:wC,17:41438720:T:C:A:wC:Alt_17-41438653-R,17:41438720:T:C:A:wC:Alt_17-41438674-R,17:41438720:T:C:A:wC:Alt_17-41438698-R,17:41438720:T:C:A:wC:Alt_17-41438729-R,17:41438720:T:C:A:wC:Alt_17-41438735-R"
+   ],
+   "36 colons, 6 tokens": [
+    "17:41438729:C:T:A:wR:Alt_17-41438620-R,17:41438729:C:T:A:wR:Alt_17-41438626-R,17:41438729:C:T:A:wR:Alt_17-41438653-R,17:41438729:C:T:A:wR:Alt_17-41438674-R,17:41438729:C:T:A:wR:Alt_17-41438698-R,17:41438729:C:T:A:wR:Alt_17-41438720-R",
+    "17:41438729:C:T:R:wR:Alt_17-41438620-R,17:41438729:C:T:R:wR:Alt_17-41438626-R,17:41438729:C:T:R:wR:Alt_17-41438653-R,17:41438729:C:T:R:wR:Alt_17-41438674-R,17:41438729:C:T:R:wR:Alt_17-41438698-R,17:41438729:C:T:R:wR:Alt_17-41438720-R"
+   ],
+   "41 colons, 7 tokens": [
+    "19:46974678:C:G:A:wC,19:46974678:C:G:A:wC:Alt_19-46974652-R,19:46974678:C:G:A:wC:Alt_19-46974728-R,19:46974678:C:G:A:wC:Alt_19-46974748-R,19:46974678:C:G:A:wC:Alt_19-46974752-R,19:46974678:C:G:A:wC:Alt_19-46974762-R,19:46974728:C:T:R:wR:Alt_19-46974678-A",
+    "11:308015:T:C:R:wC,11:308015:T:C:R:wC:Alt_11-307999-R,11:308015:T:C:R:wC:Alt_11-308059-R,11:308015:T:C:R:wC:Alt_11-308065-R,11:308065:T:C:R:wR:Alt_11-307999-R,11:308065:T:C:R:wR:Alt_11-308015-R,11:308065:T:C:R:wR:Alt_11-308059-R"
+   ],
+   "42 colons, 7 tokens": [
+    "19:46974652:G:C:A:wL:Alt_19-46974678-R,19:46974652:G:C:A:wL:Alt_19-46974728-R,19:46974652:G:C:A:wL:Alt_19-46974748-R,19:46974652:G:C:A:wL:Alt_19-46974752-R,19:46974652:G:C:A:wL:Alt_19-46974762-R,19:46974652:G:C:A:wL:Alt_19-46974781-R,19:46974752:G:C:R:wR:Alt_19-46974652-A",
+    "17:41438735:T:C:A:wR:Alt_17-41438620-R,17:41438735:T:C:A:wR:Alt_17-41438626-R,17:41438735:T:C:A:wR:Alt_17-41438653-R,17:41438735:T:C:A:wR:Alt_17-41438674-R,17:41438735:T:C:A:wR:Alt_17-41438698-R,17:41438735:T:C:A:wR:Alt_17-41438720-R,17:41438735:T:C:A:wR:Alt_17-41438729-R"
+   ],
+   "47 colons, 8 tokens": [
+    "19:46974678:C:G:R:wC,19:46974678:C:G:R:wC:Alt_19-46974652-R,19:46974678:C:G:R:wC:Alt_19-46974728-R,19:46974678:C:G:R:wC:Alt_19-46974748-R,19:46974678:C:G:R:wC:Alt_19-46974752-R,19:46974678:C:G:R:wC:Alt_19-46974762-R,19:46974728:C:T:R:wR:Alt_19-46974652-R,19:46974728:C:T:R:wR:Alt_19-46974678-R",
+    "17:41438674:G:A:A:wC,17:41438674:G:A:A:wC:Alt_17-41438620-R,17:41438674:G:A:A:wC:Alt_17-41438626-R,17:41438674:G:A:A:wC:Alt_17-41438653-R,17:41438674:G:A:A:wC:Alt_17-41438698-R,17:41438674:G:A:A:wC:Alt_17-41438720-R,17:41438674:G:A:A:wC:Alt_17-41438729-R,17:41438674:G:A:A:wC:Alt_17-41438735-R"
+   ],
+   "48 colons, 8 tokens": [
+    "17:41438620:C:A:A:wL:Alt_17-41438626-R,17:41438620:C:A:A:wL:Alt_17-41438653-R,17:41438620:C:A:A:wL:Alt_17-41438674-R,17:41438620:C:A:A:wL:Alt_17-41438698-R,17:41438620:C:A:A:wL:Alt_17-41438720-R,17:41438620:C:A:A:wL:Alt_17-41438729-R,17:41438620:C:A:A:wL:Alt_17-41438735-R,17:41438720:T:C:R:wR:Alt_17-41438620-A"
+   ],
+   "5 colons, 1 tokens": [
+    "7:70038969:G:T:A:wC",
+    "1:192696196:C:T:A:wC"
+   ],
+   "6 colons, 1 tokens": [
+    "9:95644107:A:G:R:wR:Alt_9-95644104-R",
+    "9:95644107:A:G:A:wR:Alt_9-95644104-R"
+   ],
+   "60 colons, 10 tokens": [
+    "19:46974652:G:C:R:wL:Alt_19-46974678-R,19:46974652:G:C:R:wL:Alt_19-46974728-R,19:46974652:G:C:R:wL:Alt_19-46974748-R,19:46974652:G:C:R:wL:Alt_19-46974752-R,19:46974652:G:C:R:wL:Alt_19-46974762-R,19:46974652:G:C:R:wL:Alt_19-46974781-R,19:46974752:G:C:R:wR:Alt_19-46974652-R,19:46974752:G:C:R:wR:Alt_19-46974678-R,19:46974752:G:C:R:wR:Alt_19-46974728-R,19:46974752:G:C:R:wR:Alt_19-46974748-R"
+   ],
+   "65 colons, 11 tokens": [
+    "16:420673:A:G:R:wC,16:420673:A:G:R:wC:Alt_16-420592-R,16:420673:A:G:R:wC:Alt_16-420645-R,16:420673:A:G:R:wC:Alt_16-420648-R,16:420673:A:G:R:wC:Alt_16-420678-R,16:420673:A:G:R:wC:Alt_16-420723-R,16:420723:T:G:R:wR:Alt_16-420592-R,16:420723:T:G:R:wR:Alt_16-420645-R,16:420723:T:G:R:wR:Alt_16-420648-R,16:420723:T:G:R:wR:Alt_16-420673-R,16:420723:T:G:R:wR:Alt_16-420678-R"
+   ],
+   "71 colons, 12 tokens": [
+    "19:46974678:C:G:R:wL:Alt_19-46974728-R,19:46974678:C:G:R:wL:Alt_19-46974748-R,19:46974678:C:G:R:wL:Alt_19-46974752-R,19:46974678:C:G:R:wL:Alt_19-46974762-R,19:46974678:C:G:R:wL:Alt_19-46974781-R,19:46974728:C:T:R:wC,19:46974728:C:T:R:wC:Alt_19-46974652-R,19:46974728:C:T:R:wC:Alt_19-46974678-R,19:46974728:C:T:R:wC:Alt_19-46974748-R,19:46974728:C:T:R:wC:Alt_19-46974752-R,19:46974728:C:T:R:wC:Alt_19-46974762-R,19:46974728:C:T:R:wC:Alt_19-46974781-R"
+   ],
+   "72 colons, 12 tokens": [
+    "17:41438620:C:A:R:wL:Alt_17-41438626-R,17:41438620:C:A:R:wL:Alt_17-41438653-R,17:41438620:C:A:R:wL:Alt_17-41438674-R,17:41438620:C:A:R:wL:Alt_17-41438698-R,17:41438620:C:A:R:wL:Alt_17-41438720-R,17:41438620:C:A:R:wL:Alt_17-41438729-R,17:41438620:C:A:R:wL:Alt_17-41438735-R,17:41438720:T:C:R:wR:Alt_17-41438620-R,17:41438720:T:C:R:wR:Alt_17-41438626-R,17:41438720:T:C:R:wR:Alt_17-41438653-R,17:41438720:T:C:R:wR:Alt_17-41438674-R,17:41438720:T:C:R:wR:Alt_17-41438698-R"
+   ]
+  },
+  "example_ids_without_chromosome": [],
+  "chromosome_Y_pieces": 19
+ },
+ "not_200_letters_acgt_by_category": {
+  "single-letter pair": 430,
+  "insertion/deletion pair": 28665,
+  "off-centre window": 1861,
+  "non-variant piece": 0,
+  "multi-variant piece": 3424
+ },
+ "on_held_chromosomes_by_part": {
+  "locked_5_14_22": 79850,
+  "practice_6_13_20": 76435
+ },
+ "label_agreement_on_pieces_in_both_tables": {
+  "HEPG2": {
+   "pieces": 416153,
+   "pearson": 0.9966576256775884,
+   "mean_abs_difference": 0.025646972800948725,
+   "mean_difference_gosai_minus_train": 0.004375642248695406
+  },
+  "K562": {
+   "pieces": 415599,
+   "pearson": 0.9968814529297915,
+   "mean_abs_difference": 0.04809297621460912,
+   "mean_difference_gosai_minus_train": -0.025162189928139463
+  },
+  "SKNSH": {
+   "pieces": 415515,
+   "pearson": 0.9955522442521069,
+   "mean_abs_difference": 0.03801952494987703,
+   "mean_difference_gosai_minus_train": -0.0027058836951797138
+  }
+ },
+ "already_in_train_table_by_category": {
+  "single-letter pair": 417352,
+  "insertion/deletion pair": 0,
+  "off-centre window": 0,
+  "non-variant piece": 0,
+  "multi-variant piece": 104
+ },
+ "exact_duplicate_sequences_removed": 0,
+ "held_out_pieces_in_guard": 115200,
+ "guard_hits_with_the_original_cap_8_function": {
+  "same_dna_as_scan_piece": 1395,
+  "same_dna_as_practice_or_locked_variant_piece": 27623,
+  "same_dna_as_lentimpra_fold_9_10": 17045
+ },
+ "guard_hits_missed_by_cap_8_but_found_by_exact_count": {
+  "scan": 0,
+  "practice_or_locked": 10891,
+  "lentimpra": 3186,
+  "pieces_hit_by_cap_8_but_not_by_exact_count (should be 0)": 0
+ },
+ "guard_hits_each_alone_before_any_guard_removal": {
+  "within_200_letters_of_a_scan_variant": 885,
+  "same_dna_as_scan_piece": 1395,
+  "same_dna_as_practice_or_locked_variant_piece": 38514,
+  "same_dna_as_lentimpra_fold_9_10": 20231,
+  "any_guard": 47458
+ },
+ "guard_hits_by_category": {
+  "single-letter pair": 39358,
+  "insertion/deletion pair": 2441,
+  "off-centre window": 1776,
+  "non-variant piece": 672,
+  "multi-variant piece": 3211
+ },
+ "final_pieces": 142485,
+ "final_by_category": {
+  "single-letter pair": 68375,
+  "multi-variant piece": 28067,
+  "insertion/deletion pair": 20076,
+  "off-centre window": 15198,
+  "non-variant piece": 10769
+ },
+ "final_by_data_project": {
+  "GTEX": 71365,
+  "UKBB": 60630,
+  "CRE": 10490
+ },
+ "final_pairs_complete_in_kept_set": 105506,
+ "final_with_a_missing_partner": 36979,
+ "labels_missing_in_final": {
+  "HEPG2": 0,
+  "K562": 0,
+  "SKNSH": 0,
+  "HCT116": 142485,
+  "A549": 142485
+ },
+ "steps": [
+  {
+   "step": "0 start (all rows of Table S2)",
+   "pieces": 798064,
+   "by_category": {
+    "single-letter pair": 660984,
+    "insertion/deletion pair": 57193,
+    "off-centre window": 22957,
+    "non-variant piece": 14464,
+    "multi-variant piece": 42466
+   }
+  },
+  {
+   "step": "1 chromosome established from the ID (agrees with the chr column)",
+   "pieces": 798064,
+   "by_category": {
+    "single-letter pair": 660984,
+    "insertion/deletion pair": 57193,
+    "off-centre window": 22957,
+    "non-variant piece": 14464,
+    "multi-variant piece": 42466
+   }
+  },
+  {
+   "step": "2 exactly 200 letters of A, C, G, T",
+   "pieces": 763684,
+   "by_category": {
+    "single-letter pair": 660554,
+    "insertion/deletion pair": 28528,
+    "off-centre window": 21096,
+    "non-variant piece": 14464,
+    "multi-variant piece": 39042
+   }
+  },
+  {
+   "step": "3 training chromosomes only",
+   "pieces": 607399,
+   "by_category": {
+    "single-letter pair": 525085,
+    "insertion/deletion pair": 22517,
+    "off-centre window": 16974,
+    "non-variant piece": 11441,
+    "multi-variant piece": 31382
+   }
+  },
+  {
+   "step": "4 sequence not already in train.parquet (either version)",
+   "pieces": 189943,
+   "by_category": {
+    "single-letter pair": 107733,
+    "insertion/deletion pair": 22517,
+    "off-centre window": 16974,
+    "non-variant piece": 11441,
+    "multi-variant piece": 31278
+   }
+  },
+  {
+   "step": "5 exact duplicate sequences removed (one kept)",
+   "pieces": 189943,
+   "by_category": {
+    "single-letter pair": 107733,
+    "insertion/deletion pair": 22517,
+    "off-centre window": 16974,
+    "non-variant piece": 11441,
+    "multi-variant piece": 31278
+   }
+  },
+  {
+   "step": "6 guard: scan (within 200 letters, or the same DNA as a scan piece) (cumulative)",
+   "pieces": 188484,
+   "by_category": {
+    "single-letter pair": 106933,
+    "insertion/deletion pair": 22505,
+    "off-centre window": 16765,
+    "non-variant piece": 11439,
+    "multi-variant piece": 30842
+   },
+   "removed_by_this_guard_alone": 1459
+  },
+  {
+   "step": "7 guard: same DNA as a practice or locked variant piece (cumulative)",
+   "pieces": 150509,
+   "by_category": {
+    "single-letter pair": 73960,
+    "insertion/deletion pair": 20272,
+    "off-centre window": 15852,
+    "non-variant piece": 11134,
+    "multi-variant piece": 29291
+   },
+   "removed_by_this_guard_alone": 38514
+  },
+  {
+   "step": "8 guard: same DNA as a lentiMPRA piece of fold 9 or 10 (cumulative)",
+   "pieces": 142485,
+   "by_category": {
+    "single-letter pair": 68375,
+    "insertion/deletion pair": 20076,
+    "off-centre window": 15198,
+    "non-variant piece": 10769,
+    "multi-variant piece": 28067
+   },
+   "removed_by_this_guard_alone": 20231
+  }
+ ]
+}
