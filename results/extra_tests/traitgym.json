@@ -1,0 +1,149 @@
+{
+  "variants": 3380,
+  "positives": 338,
+  "random_auprc": 0.1,
+  "centre_letter_matches": 3380,
+  "primary_window_with_N": 0,
+  "models": {
+    "CADD (check)": {
+      "pooled_auprc": 0.6940837189931337,
+      "pooled_ci95": [
+        0.6534163923826772,
+        0.7395102702805172
+      ],
+      "chrom_weighted_auprc": 0.7121847808331816
+    },
+    "model1 PRIMARY": {
+      "pooled_auprc": 0.26682714011261954,
+      "pooled_ci95": [
+        0.2268757120100531,
+        0.31819758589828473
+      ],
+      "chrom_weighted_auprc": 0.29775636398192024
+    },
+    "model1 secondary: all outputs mean": {
+      "pooled_auprc": 0.261781186853645,
+      "pooled_ci95": [
+        0.22240601960290346,
+        0.31082702460567335
+      ],
+      "chrom_weighted_auprc": 0.29585113507492833
+    },
+    "model1 secondary: max over outputs": {
+      "pooled_auprc": 0.2962331165519961,
+      "pooled_ci95": [
+        0.25185755710968666,
+        0.34946324141284346
+      ],
+      "chrom_weighted_auprc": 0.3304056648620106
+    },
+    "model1 secondary: 5 offsets": {
+      "pooled_auprc": 0.2759959544801028,
+      "pooled_ci95": [
+        0.235639793614422,
+        0.32925884270434685
+      ],
+      "chrom_weighted_auprc": 0.3039360825218215
+    },
+    "model1_seed2 PRIMARY": {
+      "pooled_auprc": 0.2677476499663699,
+      "pooled_ci95": [
+        0.22649366584367292,
+        0.3183600561878788
+      ],
+      "chrom_weighted_auprc": 0.30332638947788704
+    },
+    "model1_seed2 secondary: all outputs mean": {
+      "pooled_auprc": 0.26052313424688134,
+      "pooled_ci95": [
+        0.22051974248436715,
+        0.3080198179032324
+      ],
+      "chrom_weighted_auprc": 0.29785595734466525
+    },
+    "model1_seed2 secondary: max over outputs": {
+      "pooled_auprc": 0.2979012851466219,
+      "pooled_ci95": [
+        0.25338150722203967,
+        0.34979156523684324
+      ],
+      "chrom_weighted_auprc": 0.335121566312646
+    },
+    "model1_seed2 secondary: 5 offsets": {
+      "pooled_auprc": 0.28016815705615433,
+      "pooled_ci95": [
+        0.23862779375948906,
+        0.3326205779567404
+      ],
+      "chrom_weighted_auprc": 0.3149482444329105
+    },
+    "model2 PRIMARY": {
+      "pooled_auprc": 0.2585987880604052,
+      "pooled_ci95": [
+        0.21821553142834016,
+        0.30794992619998446
+      ],
+      "chrom_weighted_auprc": 0.2993637565174351
+    },
+    "model2 secondary: all outputs mean": {
+      "pooled_auprc": 0.24940782480859597,
+      "pooled_ci95": [
+        0.21091425793108678,
+        0.2957881910221277
+      ],
+      "chrom_weighted_auprc": 0.28400902259940863
+    },
+    "model2 secondary: max over outputs": {
+      "pooled_auprc": 0.2767014806344856,
+      "pooled_ci95": [
+        0.23403558994930262,
+        0.3276742961866887
+      ],
+      "chrom_weighted_auprc": 0.30922811361299657
+    },
+    "model2 secondary: 5 offsets": {
+      "pooled_auprc": 0.2677287922071706,
+      "pooled_ci95": [
+        0.2268888971943611,
+        0.3157510982056004
+      ],
+      "chrom_weighted_auprc": 0.30282394601590207
+    },
+    "model2_seed2 PRIMARY": {
+      "pooled_auprc": 0.2623842456515015,
+      "pooled_ci95": [
+        0.22204342716923633,
+        0.31118266771954195
+      ],
+      "chrom_weighted_auprc": 0.3007670222290828
+    },
+    "model2_seed2 secondary: all outputs mean": {
+      "pooled_auprc": 0.25349132059695356,
+      "pooled_ci95": [
+        0.2139030124187442,
+        0.29811966003425233
+      ],
+      "chrom_weighted_auprc": 0.28533134184855774
+    },
+    "model2_seed2 secondary: max over outputs": {
+      "pooled_auprc": 0.2850614582757747,
+      "pooled_ci95": [
+        0.2416425235693539,
+        0.333805343801465
+      ],
+      "chrom_weighted_auprc": 0.3193789290874509
+    },
+    "model2_seed2 secondary: 5 offsets": {
+      "pooled_auprc": 0.2719497435107069,
+      "pooled_ci95": [
+        0.2313764396551768,
+        0.3194729838828541
+      ],
+      "chrom_weighted_auprc": 0.30638185831268544
+    }
+  },
+  "model2_minus_model1_primary_ci95": [
+    -0.036707351327951214,
+    0.016733596256734835
+  ]
+}

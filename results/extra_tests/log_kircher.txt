@@ -1,0 +1,103 @@
+note: the v1 student's checkpoint is not present; it is left out
+{
+  "elements": {
+    "F9": {
+      "cell": "HepG2",
+      "changes": 888,
+      "student_v2": 0.5820467439575928,
+      "student_v2_seed2": 0.598757710440673,
+      "published": 0.4875014638889331,
+      "baseline": 0.4172775217947839,
+      "model2_new": 0.7240282853044785,
+      "model2_lenti": 0.6392070273274566,
+      "model2_seed2_new": 0.715728358147544,
+      "model2_seed2_lenti": 0.6400617752460019,
+      "model2_new_minus_model1_ci95": [
+        0.1036020721215114,
+        0.18170184743098028
+      ],
+      "model2_new_minus_published_ci95": [
+        0.19066080389971787,
+        0.2830529517918452
+      ]
+    },
+    "LDLR": {
+      "cell": "HepG2",
+      "changes": 945,
+      "student_v2": 0.6373030876028544,
+      "student_v2_seed2": 0.6296944303672585,
+      "published": 0.633721429791674,
+      "baseline": 0.23734778936227022,
+      "model2_new": 0.5636085218897926,
+      "model2_lenti": 0.6286255046361329,
+      "model2_seed2_new": 0.5304951317492295,
+      "model2_seed2_lenti": 0.5979071435990753,
+      "model2_new_minus_model1_ci95": [
+        -0.10570334249357981,
+        -0.043698215012437376
+      ],
+      "model2_new_minus_published_ci95": [
+        -0.11108783185382412,
+        -0.027419665330902263
+      ]
+    },
+    "SORT1": {
+      "cell": "HepG2",
+      "changes": 1710,
+      "student_v2": 0.6452072111656885,
+      "student_v2_seed2": 0.646069831770692,
+      "published": 0.5497975696540837,
+      "baseline": 0.36743277681742725,
+      "model2_new": 0.5646530396266929,
+      "model2_lenti": 0.6414890647668382,
+      "model2_seed2_new": 0.5706727051289128,
+      "model2_seed2_lenti": 0.6550623356066166,
+      "model2_new_minus_model1_ci95": [
+        -0.11667911573519991,
+        -0.044906617937709926
+      ],
+      "model2_new_minus_published_ci95": [
+        -0.025487451378171128,
+        0.053004088123712045
+      ]
+    },
+    "PKLR-48h": {
+      "cell": "K562",
+      "changes": 1379,
+      "student_v2": 0.6926967824389462,
+      "student_v2_seed2": 0.6811840070814047,
+      "published": 0.7055026612944748,
+      "baseline": 0.3668149974977,
+      "model2_new": 0.7700524607392666,
+      "model2_lenti": 0.7358675087477311,
+      "model2_seed2_new": 0.7762605092990996,
+      "model2_seed2_lenti": 0.7232618449134848,
+      "model2_new_minus_model1_ci95": [
+        0.051178412181248314,
+        0.1073890559209391
+      ],
+      "model2_new_minus_published_ci95": [
+        0.03076945376571039,
+        0.09954723732590824
+      ]
+    }
+  },
+  "mean": {
+    "student_v2": 0.6393134562912705,
+    "student_v2_seed2": 0.6389264949150071,
+    "published": 0.5941307811572915,
+    "baseline": 0.34721827136804534,
+    "model2_new": 0.6555855768900576,
+    "model2_lenti": 0.6612972763695397,
+    "model2_seed2_new": 0.6482891760811964,
+    "model2_seed2_lenti": 0.6540732748412947
+  },
+  "mean_model2_new_minus_model1_ci95": [
+    0.0001521584781509899,
+    0.03346350581789948
+  ],
+  "mean_model2_new_minus_published_ci95": [
+    0.0416585328763776,
+    0.08159550875159022
+  ]
+}

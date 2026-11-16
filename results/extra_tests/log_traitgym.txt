@@ -1,0 +1,20 @@
+3380 variants, 338 positives; centre letter equals reference for 3380 of 3380
+variants whose primary window holds an N: 0
+CADD (check)                                  pooled 0.6941 CI [0.653, 0.74]  chrom-weighted 0.7122
+model1 PRIMARY                                pooled 0.2668 CI [0.227, 0.318]  chrom-weighted 0.2978
+model1 secondary: all outputs mean            pooled 0.2618 CI [0.222, 0.311]  chrom-weighted 0.2959
+model1 secondary: max over outputs            pooled 0.2962 CI [0.252, 0.349]  chrom-weighted 0.3304
+model1 secondary: 5 offsets                   pooled 0.2760 CI [0.236, 0.329]  chrom-weighted 0.3039
+model1_seed2 PRIMARY                          pooled 0.2677 CI [0.226, 0.318]  chrom-weighted 0.3033
+model1_seed2 secondary: all outputs mean      pooled 0.2605 CI [0.221, 0.308]  chrom-weighted 0.2979
+model1_seed2 secondary: max over outputs      pooled 0.2979 CI [0.253, 0.35]  chrom-weighted 0.3351
+model1_seed2 secondary: 5 offsets             pooled 0.2802 CI [0.239, 0.333]  chrom-weighted 0.3149
+model2 PRIMARY                                pooled 0.2586 CI [0.218, 0.308]  chrom-weighted 0.2994
+model2 secondary: all outputs mean            pooled 0.2494 CI [0.211, 0.296]  chrom-weighted 0.2840
+model2 secondary: max over outputs            pooled 0.2767 CI [0.234, 0.328]  chrom-weighted 0.3092
+model2 secondary: 5 offsets                   pooled 0.2677 CI [0.227, 0.316]  chrom-weighted 0.3028
+model2_seed2 PRIMARY                          pooled 0.2624 CI [0.222, 0.311]  chrom-weighted 0.3008
+model2_seed2 secondary: all outputs mean      pooled 0.2535 CI [0.214, 0.298]  chrom-weighted 0.2853
+model2_seed2 secondary: max over outputs      pooled 0.2851 CI [0.242, 0.334]  chrom-weighted 0.3194
+model2_seed2 secondary: 5 offsets             pooled 0.2719 CI [0.231, 0.319]  chrom-weighted 0.3064
+model 2 minus model 1 (primary), CI [-0.036707351327951214, 0.016733596256734835]
