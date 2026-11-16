@@ -28,7 +28,7 @@ from evaluate_scan import N_BOOT, SCAN_CELLS, models, pieces, score  # noqa: E40
 from mpra_data import CELLS  # noqa: E402
 from mpra_train import RUNS, SETTINGS  # noqa: E402
 from mpra_train_multi import predict_multi  # noqa: E402
-from mpra_train_v2 import build  # noqa: E402
+from malinois_body import build_arch  # noqa: E402
 
 OUT, MORE = Path("results/practice"), Path("data/more_data")
 TABLE = {"HepG2": "HEPG2", "K562": "K562"}  # our cell names -> the variant table's
@@ -38,7 +38,7 @@ MIN_ACTIVITY, BLOCK = 1.0, 100_000
 def model2(run: str, device) -> dict:
     cfg = json.loads((Path(RUNS) / run / "log.json").read_text())["config"]
     outs = cfg["outputs"]
-    m = build("legnet", len(outs), width=float(cfg.get("width", 1.0))).to(device)
+    m = build_arch(cfg.get("arch", "legnet"), len(outs), width=float(cfg.get("width", 1.0))).to(device)  # runs before --arch existed: legnet
     m.load_state_dict(torch.load(Path(RUNS) / run / "best.pt", map_location=device, weights_only=True))
 
     def reader(index: dict):

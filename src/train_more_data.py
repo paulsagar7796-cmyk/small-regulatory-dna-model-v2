@@ -47,6 +47,11 @@ practice chromosomes are not used to pick the checkpoint.
                      constant learning rate --finetune_lr (EvoAug: 5 epochs, 1e-4). The same optimiser is kept; the best checkpoint
                      (best mean Pearson on lentiMPRA fold 9) is chosen across both stages; each log entry has a "stage".
                      --max_steps (test only) caps each stage separately.
+  --arch NAME        network design: legnet (default; models 1 and 2, unchanged) or malinois (the design of the competitor MPAC: one
+                     randomly initialised Malinois network, 4.1M parameters with 3 outputs, with our number of outputs instead; settings of
+                     data/models/MPAC/config.json; src/malinois_body.py). Our 230-letter rows (after the slide and the strand flip, which act
+                     as before) are cut to the middle 200 letters and padded to 600 with the vector flanks MPAC's own predict() uses. The run
+                     name gets the suffix _malinois. Optimiser, schedule and --lr/--wd are unchanged (--width is refused with malinois).
 Practice data only. The locked chromosomes (5, 14, 22) and lentiMPRA fold 10 are never loaded.
 
 Run from the repository root:
@@ -73,6 +78,7 @@ from mpra_train import RUNS  # noqa: E402
 from mpra_train_multi import predict_multi  # noqa: E402
 from mpra_distill import mutate  # noqa: E402
 from mpra_train_v2 import RIGHT_FLANK, build, flank_shift  # noqa: E402
+from malinois_body import build_arch  # noqa: E402
 
 MORE = Path("data/more_data")
 NEW_CELLS = ["HEPG2", "K562", "SKNSH", "HCT116", "A549"]
@@ -237,6 +243,7 @@ def main() -> None:
     ap.add_argument("--pair_batch", type=int, default=256, help="variants drawn per step for the paired-effect loss")
     ap.add_argument("--extra_table", default="", help="parquet of extra single pieces (see the docstring); empty = off")
     ap.add_argument("--width", type=float, default=1.0, help="channel multiplier of the body (1.0 = model 2's size)")
+    ap.add_argument("--arch", choices=["legnet", "malinois"], default="legnet", help="network design (see the docstring)")
     ap.add_argument("--evoaug", type=int, default=0, help="max augmentations per row (0 = off; see the docstring)")
     ap.add_argument("--evoaug_hard", action="store_true", help="exactly --evoaug augmentations per row instead of 0..N")
     ap.add_argument("--evoaug_inv", type=int, default=24, help="largest inversion (letters); 30 of 249 in the paper, scaled to 200")
@@ -258,12 +265,14 @@ def main() -> None:
         assert new_cells, "--extra_table needs new outputs (the variant table)"
     if args.evoaug and (args.pair_loss > 0 or teacher_paths):
         ap.error("--evoaug cannot be combined with --pair_loss or --teachers (not implemented)")
+    if args.arch == "malinois" and args.width != 1.0:
+        ap.error("--width only applies to --arch legnet")
     if args.evoaug < 0 or args.evoaug > len(EVOAUG_NAMES) or args.finetune_epochs < 0:
         ap.error(f"--evoaug must be 0..{len(EVOAUG_NAMES)} and --finetune_epochs >= 0")
     name = f"more_{'-'.join(new_cells) if new_cells else 'control'}" \
            + (f"_distill_t{len(teacher_paths)}_lam{args.lam}_mut{args.mut}" if teacher_paths else "") \
            + (f"_pair{args.pair_loss}" if args.pair_loss > 0 else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}" + ("_gosai" if args.extra_table else "") + (f"_w{args.width}" if args.width != 1.0 else "") \
-           + (f"_evoaug{args.evoaug}" + ("hard" if args.evoaug_hard else "") if args.evoaug else "") + (f"_ft{args.finetune_epochs}" if args.finetune_epochs else "")
+           + (f"_evoaug{args.evoaug}" + ("hard" if args.evoaug_hard else "") if args.evoaug else "") + (f"_ft{args.finetune_epochs}" if args.finetune_epochs else "") + ("_malinois" if args.arch == "malinois" else "")
     run_dir = Path(RUNS) / name
     run_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
@@ -349,7 +358,7 @@ def main() -> None:
             out = sum(t(onehot(c)) + t(onehot(reverse_complement_codes(c))) for t in teachers) / (2 * len(teachers))
         return out.float()
 
-    model = build("legnet", n_out, width=args.width).to(device)
+    model = build_arch(args.arch, n_out, width=args.width).to(device)
     steps_per_epoch = (len(x_tr) + args.batch - 1) // args.batch
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr / 25, weight_decay=args.wd)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=args.epochs * steps_per_epoch,
