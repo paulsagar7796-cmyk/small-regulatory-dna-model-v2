@@ -55,3 +55,7 @@ Model 2 **with model 1's second training step**: one student taught by three tra
 - **Same assay advantage** (above). Models trained on this family of data by other groups (Malinois, MPAC) exist and were not run by us; this test makes no claim against them.
 - The test variants are natural variants, most of which have small or no effect. The saturation scan's practice half is the complementary practice measure.
 - One table, one split.
+
+## Addendum (2026-11-16)
+
+This addendum was written after the locked test. The confirmed text above is unchanged. A flaw was found in the leak guard that built the training table (`Index.best_match` in `src/prepare_more_data.py`): it looked only at the first 8 pieces that contain each 24-letter word, so it missed some near-copies from repeat families. 3,277 of the 29,397 locked variants have a near-copy among the training pieces. The maintainer approved one re-score of the fixed models on the locked variants without a near-copy (`src/rescore_nearcopy.py`, checked on the practice chromosomes first; no model or setting was chosen from it). All four marks still hold on that subset (gain 0.080, 95% interval 0.068 to 0.094). The original result stays the result of record. Numbers: `results/locked/NEARCOPY_RESCORE.json`; text: the correction section of `results/locked/REPORT.md`.

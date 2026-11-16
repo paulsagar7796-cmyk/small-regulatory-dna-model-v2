@@ -17,6 +17,8 @@ Chromosomes 5, 14, 22, 29,397 variants. Pearson correlation between measured and
 
 Gain over model 1: **0.086 (95% interval 0.074 to 0.099)**. All four pass marks, confirmed before the test, are met. Full report with limits: [results/locked/REPORT.md](results/locked/REPORT.md). The locked chromosomes are now closed.
 
+**Correction (16 Nov 2026).** A flaw in the leak guard left near-copies of 3,277 of the 29,397 locked variants in the training table. Re-scored once on the variants without a near-copy (5,259 HepG2 / 5,389 K562), model 2 scores **0.590** (seed 2: 0.588) against model 1 0.510, published MPRA-LegNet 0.468 and the baseline 0.319. Gain over model 1: **0.080 (95% interval 0.068 to 0.094)**; all four pass marks still hold. The numbers above stay the test result of record; this is a post hoc correction. Details: [results/locked/REPORT.md](results/locked/REPORT.md#correction-2026-11-16-near-copies-in-training).
+
 ## Why a second model
 
 Model 1 was trained on one public dataset (lentiMPRA, three cell types). After it was released we tried to push it further without new data, and every route was used up:
@@ -94,6 +96,8 @@ The new data clearly improves single-letter accuracy on both practice measures, 
 ## Honest framing, decided in advance
 
 Model 2 passed, so the claim is **"a better small model with more data"**. It is not a same-data comparison: model 2 has seen the test's assay and laboratory during training, and model 1 and the published model have not. Other groups have trained models on this family of data (Malinois, MPAC); we have not run them and make no claim against them.
+
+The leak guard missed some near-copies in repeated DNA; the locked result corrected for this is 0.590, gain 0.080 (see the correction above). The MPAC comparison and the scan practice numbers were not corrected.
 
 ## Layout
 

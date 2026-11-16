@@ -55,6 +55,35 @@ Fixed students:
 | 3 | In neither cell type is model 2 more than 0.01 below model 1 | model 2 is above model 1 in both; the smaller margin is 0.083 (K562) | PASS |
 | 4 | The two seeds' means differ by at most 0.02 | 0.001 | PASS |
 
+## Correction (2026-11-16): near-copies in training
+
+**This is a post hoc correction. The result above, scored on all locked variants, stays the test result of record.**
+
+**Cause.** The leak guard that built the training table (`Index.best_match` in `src/prepare_more_data.py`) should remove every training piece that is "the same DNA" as a practice or locked piece: 27 or more of a piece's 177 24-letter words shared with one other piece. To save time, it looked only at the first 8 pieces that contain each word. Words from repeat families (DNA that occurs in many similar copies in the genome) have many more owners, so some near-copies were missed.
+
+**Size.** 3,277 of the 29,397 locked variants (and 2,661 of the 28,104 practice variants) have a near-copy among the training pieces from the new table.
+
+**Re-score.** The script `src/rescore_nearcopy.py` was committed and checked on the practice chromosomes first. The maintainer then approved one run on the locked chromosomes. No model or setting was chosen from it. The fixed models were re-scored on the variants without a near-copy, counted exactly. The measure is the same as in the test: effect Pearson, mean of HepG2 and K562, same block bootstrap. Numbers: `results/locked/NEARCOPY_RESCORE.json` (practice: `results/practice/NEARCOPY_RESCORE.json`).
+
+| Variants | Scored HepG2 / K562 | Model 2 | Model 2 seed 2 | Model 1 | Published MPRA-LegNet | 6-letter-word baseline | Gain over model 1 (95% interval) |
+|---|---|---|---|---|---|---|---|
+| All (the original test) | 5,800 / 6,081 | 0.594 | 0.592 | 0.508 | 0.466 | 0.319 | 0.086 (0.074 to 0.099) |
+| Without a near-copy in training | 5,259 / 5,389 | 0.590 | 0.588 | 0.510 | 0.468 | 0.319 | 0.080 (0.068 to 0.094) |
+| Only those with a near-copy | 541 / 692 | 0.627 | 0.628 | 0.494 | 0.464 | 0.323 | 0.133 (0.091 to 0.181) |
+
+Without near-copies, per cell type: model 2 HepG2 0.631, K562 0.549; model 1 HepG2 0.547, K562 0.472. Model 2 minus the published model: 95% interval 0.106 to 0.138.
+
+Practice chromosomes, for comparison: all variants 0.584 against model 1 0.491 (gain 0.093, 0.078 to 0.109); without a near-copy 0.577 against 0.493 (gain 0.084, 0.070 to 0.100); only near-copies 0.648 against 0.477.
+
+**What still holds.** The flaw raised model 2's score by about 0.004 and its gain over model 1 by about 0.005. On the corrected subset all four pre-declared marks still hold: the interval of the gain is above zero (0.068 to 0.094), the gain is at least 0.06 (0.080), model 2 is above model 1 in both cell types, and the two seeds differ by 0.002.
+
+**What was not corrected.**
+- The MPAC reference comparison (MPAC 0.604 against model 2 0.594 on all locked variants) was not re-scored on this subset. Model 2's side carries the same small inflation, so MPAC's narrow lead is, if anything, slightly understated.
+- The scan practice numbers were not re-examined for this flaw.
+- The lentiMPRA guard used the same shortcut.
+
+Any new split will use the exact guard `exact_best_match` in `src/prepare_gosai_extra.py`.
+
 ## Reported beside the test (not pass or fail)
 
 **Variants whose pieces share no 24-letter word with any training piece** (a stricter view of leaks through repeated DNA; 3,576 variants in HepG2, 3,587 in K562):
