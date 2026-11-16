@@ -38,7 +38,7 @@ MIN_ACTIVITY, BLOCK = 1.0, 100_000
 def model2(run: str, device) -> dict:
     cfg = json.loads((Path(RUNS) / run / "log.json").read_text())["config"]
     outs = cfg["outputs"]
-    m = build("legnet", len(outs)).to(device)
+    m = build("legnet", len(outs), width=float(cfg.get("width", 1.0))).to(device)
     m.load_state_dict(torch.load(Path(RUNS) / run / "best.pt", map_location=device, weights_only=True))
 
     def reader(index: dict):

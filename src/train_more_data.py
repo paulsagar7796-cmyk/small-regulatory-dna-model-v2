@@ -133,6 +133,7 @@ def main() -> None:
     ap.add_argument("--pair_loss", type=float, default=0.0, help="weight of the paired-effect loss (0 = off)")
     ap.add_argument("--pair_batch", type=int, default=256, help="variants drawn per step for the paired-effect loss")
     ap.add_argument("--extra_table", default="", help="parquet of extra single pieces (see the docstring); empty = off")
+    ap.add_argument("--width", type=float, default=1.0, help="channel multiplier of the body (1.0 = model 2's size)")
     ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only")
     ap.add_argument("--tag", default="")
     args = ap.parse_args()
@@ -145,7 +146,7 @@ def main() -> None:
         assert new_cells, "--extra_table needs new outputs (the variant table)"
     name = f"more_{'-'.join(new_cells) if new_cells else 'control'}" \
            + (f"_distill_t{len(teacher_paths)}_lam{args.lam}_mut{args.mut}" if teacher_paths else "") \
-           + (f"_pair{args.pair_loss}" if args.pair_loss > 0 else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}" + ("_gosai" if args.extra_table else "")
+           + (f"_pair{args.pair_loss}" if args.pair_loss > 0 else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}" + ("_gosai" if args.extra_table else "") + (f"_w{args.width}" if args.width != 1.0 else "")
     run_dir = Path(RUNS) / name
     run_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
@@ -231,7 +232,7 @@ def main() -> None:
             out = sum(t(onehot(c)) + t(onehot(reverse_complement_codes(c))) for t in teachers) / (2 * len(teachers))
         return out.float()
 
-    model = build("legnet", n_out).to(device)
+    model = build("legnet", n_out, width=args.width).to(device)
     steps_per_epoch = (len(x_tr) + args.batch - 1) // args.batch
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr / 25, weight_decay=args.wd)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=args.epochs * steps_per_epoch,
