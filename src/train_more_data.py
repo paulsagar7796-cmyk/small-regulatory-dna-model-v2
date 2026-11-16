@@ -32,6 +32,21 @@ practice chromosomes are not used to pick the checkpoint.
                      copies of this same model. The student then also learns their averaged prediction for
                      ALL outputs, on every piece and on a copy of it with --mut of its letters swapped
                      (for which no lab label exists). Teachers saw the same training rows as the student.
+  --evoaug N         EvoAug-style augmentation (Lee, Tang, Toneyan, Koo, Genome Biology 2023, doi 10.1186/s13059-023-02941-w;
+                     code github.com/p-koo/evoaug). 0 = off (the script is then bit-for-bit as before). Every training row gets,
+                     independently, a random number of augmentations, uniform 0..N (--evoaug_hard: exactly N), drawn without
+                     replacement from five: inversion (a segment replaced by its reverse complement), deletion (a segment removed,
+                     the row padded back to length with random letters, half at each end), translocation (the insert rolled by up
+                     to +-max letters), insertion (random letters put in at a random point, the 3' end trimmed to length) and
+                     point mutation (about --evoaug_mut of the letters swapped). They act on the 200-letter insert only, never
+                     on the two adapters, are applied in EvoAug's order (inversion, deletion, translocation, insertion,
+                     mutation) and come BEFORE the usual slide and random strand. Labels stay unchanged. Size limits
+                     (--evoaug_inv/_del/_trans/_ins, --evoaug_mut) default to the DeepSTARR values of the paper scaled from 249 to
+                     200 letters. Own random stream (seed + 104729). Refused together with --pair_loss or --teachers.
+  --finetune_epochs M  after the main schedule, M more epochs with the EvoAug augmentations off (slide and strand stay on) at the
+                     constant learning rate --finetune_lr (EvoAug: 5 epochs, 1e-4). The same optimiser is kept; the best checkpoint
+                     (best mean Pearson on lentiMPRA fold 9) is chosen across both stages; each log entry has a "stage".
+                     --max_steps (test only) caps each stage separately.
 Practice data only. The locked chromosomes (5, 14, 22) and lentiMPRA fold 10 are never loaded.
 
 Run from the repository root:
@@ -118,6 +133,94 @@ def masked_mse(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     return (err.sum(0)[n > 0] / n[n > 0]).mean()
 
 
+EVOAUG_NAMES = ["inversion", "deletion", "translocation", "insertion", "mutation"]  # also EvoAug's order of application
+EVOAUG_SALT = 104729
+
+
+def _rand_letters(shape, gen: torch.Generator, dtype) -> torch.Tensor:
+    return torch.randint(0, 4, shape, generator=gen).to(dtype)
+
+
+def evo_inversion(x: torch.Tensor, vmax: int, gen: torch.Generator) -> torch.Tensor:
+    """A random segment (length 0..vmax, start uniform over the places it fits) is replaced by its reverse complement."""
+    n, length = x.shape
+    v = torch.randint(0, vmax + 1, (n, 1), generator=gen)
+    s = (torch.rand(n, 1, generator=gen) * (length - v + 1)).long()
+    j = torch.arange(length)[None, :]
+    inside = (j >= s) & (j < s + v)
+    src = torch.where(inside, 2 * s + v - 1 - j, j)
+    y = x.gather(1, src)
+    return torch.where(inside & (y < 4), 3 - y, y)  # complement; N (code 4) stays N
+
+
+def evo_deletion(x: torch.Tensor, dmax: int, gen: torch.Generator) -> torch.Tensor:
+    """A random segment (length 0..dmax) is cut out; the row is padded back to length with random letters, d // 2 in front
+    and the rest behind (as EvoAug does)."""
+    n, length = x.shape
+    d = torch.randint(0, dmax + 1, (n, 1), generator=gen)
+    s = (torch.rand(n, 1, generator=gen) * (length - d + 1)).long()
+    pad_l = d // 2
+    j = torch.arange(length)[None, :]
+    k = j - pad_l  # index into the shortened sequence
+    kept = (k >= 0) & (k < length - d)
+    src = (torch.where(k < s, k, k + d)).clamp(0, length - 1)
+    return torch.where(kept, x.gather(1, src), _rand_letters(x.shape, gen, x.dtype))
+
+
+def evo_translocation(x: torch.Tensor, tmax: int, gen: torch.Generator) -> torch.Tensor:
+    """The row is rolled (cut at one point, the two parts swapped) by 0..tmax letters, either direction."""
+    n, length = x.shape
+    sh = torch.randint(0, tmax + 1, (n, 1), generator=gen) * (2 * torch.randint(0, 2, (n, 1), generator=gen) - 1)
+    return x.gather(1, (torch.arange(length)[None, :] - sh) % length)
+
+
+def evo_insertion(x: torch.Tensor, imax: int, gen: torch.Generator) -> torch.Tensor:
+    """0..imax random letters are put in at a random point (uniform over 0..length-1); the 3' end is cut off to keep the length."""
+    n, length = x.shape
+    m = torch.randint(0, imax + 1, (n, 1), generator=gen)
+    p = (torch.rand(n, 1, generator=gen) * length).long()
+    j = torch.arange(length)[None, :]
+    new = (j >= p) & (j < p + m)
+    src = torch.where(j < p, j, j - m).clamp(0, length - 1)
+    return torch.where(new, _rand_letters(x.shape, gen, x.dtype), x.gather(1, src))
+
+
+def evo_mutation(x: torch.Tensor, frac: float, gen: torch.Generator) -> torch.Tensor:
+    """round(frac / 0.75 * length) distinct positions get a letter drawn uniformly from ACGT (a quarter of them equal the old
+    letter, so about frac of the letters change; EvoAug's rule)."""
+    n, length = x.shape
+    k = int(round(frac / 0.75 * length))
+    if k == 0:
+        return x
+    pos = torch.rand(n, length, generator=gen).topk(k, dim=1).indices
+    return x.scatter(1, pos, _rand_letters((n, k), gen, x.dtype))
+
+
+def evoaug_insert(ins: torch.Tensor, n_max: int, hard: bool, sizes: dict, gen: torch.Generator) -> torch.Tensor:
+    """EvoAug on a batch of inserts (n, 200 or so, uint8 codes). Row i gets a count uniform in 0..n_max (hard: n_max), and that many of the five
+    augmentations, drawn without replacement; each augmentation then runs only on the rows that drew it."""
+    n = len(ins)
+    count = torch.full((n, 1), n_max) if hard else torch.randint(0, n_max + 1, (n, 1), generator=gen)
+    rank = torch.rand(n, len(EVOAUG_NAMES), generator=gen).argsort(1).argsort(1)  # a random permutation of 0..4 per row
+    chosen = rank < count
+    fns = {"inversion": lambda x: evo_inversion(x, sizes["inversion"], gen), "deletion": lambda x: evo_deletion(x, sizes["deletion"], gen),
+           "translocation": lambda x: evo_translocation(x, sizes["translocation"], gen),
+           "insertion": lambda x: evo_insertion(x, sizes["insertion"], gen), "mutation": lambda x: evo_mutation(x, sizes["mutation"], gen)}
+    ins = ins.clone()
+    for a, name in enumerate(EVOAUG_NAMES):
+        rows = chosen[:, a].nonzero().squeeze(1)
+        if len(rows):
+            ins[rows] = fns[name](ins[rows])
+    return ins
+
+
+def evoaug_batch(c: torch.Tensor, n_max: int, hard: bool, sizes: dict, gen: torch.Generator, adapter: int = 15) -> torch.Tensor:
+    """c: (n, 230) rows, adapter + 200-letter insert + adapter. Only the insert is augmented."""
+    out = c.clone()
+    out[:, adapter:-adapter] = evoaug_insert(c[:, adapter:-adapter], n_max, hard, sizes, gen)
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--new_cells", default=",".join(NEW_CELLS))
@@ -134,7 +237,16 @@ def main() -> None:
     ap.add_argument("--pair_batch", type=int, default=256, help="variants drawn per step for the paired-effect loss")
     ap.add_argument("--extra_table", default="", help="parquet of extra single pieces (see the docstring); empty = off")
     ap.add_argument("--width", type=float, default=1.0, help="channel multiplier of the body (1.0 = model 2's size)")
-    ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only")
+    ap.add_argument("--evoaug", type=int, default=0, help="max augmentations per row (0 = off; see the docstring)")
+    ap.add_argument("--evoaug_hard", action="store_true", help="exactly --evoaug augmentations per row instead of 0..N")
+    ap.add_argument("--evoaug_inv", type=int, default=24, help="largest inversion (letters); 30 of 249 in the paper, scaled to 200")
+    ap.add_argument("--evoaug_del", type=int, default=24, help="largest deletion; 30 of 249 in the paper, scaled to 200")
+    ap.add_argument("--evoaug_trans", type=int, default=16, help="largest roll; 20 of 249 in the paper, scaled to 200")
+    ap.add_argument("--evoaug_ins", type=int, default=16, help="largest insertion; 20 of 249 in the paper, scaled to 200")
+    ap.add_argument("--evoaug_mut", type=float, default=0.05, help="share of letters changed by the point mutations (paper, DeepSTARR: 0.05)")
+    ap.add_argument("--finetune_epochs", type=int, default=0, help="extra epochs without EvoAug after the main schedule")
+    ap.add_argument("--finetune_lr", type=float, default=1e-4, help="constant learning rate of the fine-tuning epochs (EvoAug: 1e-4)")
+    ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only (caps each stage)")
     ap.add_argument("--tag", default="")
     args = ap.parse_args()
     new_cells = [] if args.new_cells == "none" else args.new_cells.split(",")
@@ -144,9 +256,14 @@ def main() -> None:
         assert new_cells, "--pair_loss needs new outputs (the variant table)"
     if args.extra_table:
         assert new_cells, "--extra_table needs new outputs (the variant table)"
+    if args.evoaug and (args.pair_loss > 0 or teacher_paths):
+        ap.error("--evoaug cannot be combined with --pair_loss or --teachers (not implemented)")
+    if args.evoaug < 0 or args.evoaug > len(EVOAUG_NAMES) or args.finetune_epochs < 0:
+        ap.error(f"--evoaug must be 0..{len(EVOAUG_NAMES)} and --finetune_epochs >= 0")
     name = f"more_{'-'.join(new_cells) if new_cells else 'control'}" \
            + (f"_distill_t{len(teacher_paths)}_lam{args.lam}_mut{args.mut}" if teacher_paths else "") \
-           + (f"_pair{args.pair_loss}" if args.pair_loss > 0 else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}" + ("_gosai" if args.extra_table else "") + (f"_w{args.width}" if args.width != 1.0 else "")
+           + (f"_pair{args.pair_loss}" if args.pair_loss > 0 else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}" + ("_gosai" if args.extra_table else "") + (f"_w{args.width}" if args.width != 1.0 else "") \
+           + (f"_evoaug{args.evoaug}" + ("hard" if args.evoaug_hard else "") if args.evoaug else "") + (f"_ft{args.finetune_epochs}" if args.finetune_epochs else "")
     run_dir = Path(RUNS) / name
     run_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
@@ -245,70 +362,85 @@ def main() -> None:
           + (f" + {extra_rows:,} extra rows" if args.extra_table else "") + f"; {steps_per_epoch:,} steps per epoch; "
           f"{n_out} outputs; device {device}", flush=True)
     gen = torch.Generator().manual_seed(args.seed)
-    log, best, t0, step = [], -1.0, time.time(), 0
-    for epoch in range(1, args.epochs + 1):
-        order, losses, pair_losses = torch.randperm(len(x_tr), generator=gen), [], []
-        for i in range(0, len(order), args.batch):
-            idx = order[i : i + args.batch]
-            c = x_tr[idx]
-            if args.shift:
-                c = flank_shift(c, args.shift, flank, gen)
-            if teachers and args.mut:
-                c = torch.cat([c, mutate(c, args.mut, gen)])
-            target = y_tr[idx]
-            if pair_var is not None:  # both versions of --pair_batch random variants, same slide, appended to the batch
-                pc, p1, p2 = draw_pairs(x_tr, lenti_rows, n_var, args.pair_batch, args.shift, flank, pgen)
-                n_main = len(c)
-                c = torch.cat([c, pc])
-                target = torch.cat([target, y_tr[torch.cat([p1, p2])]])
-            c, target = c.to(device), target.to(device)
-            if torch.rand(1, generator=gen).item() < 0.5:  # one strand for the whole batch, so also for both versions of a pair
-                c = reverse_complement_codes(c)
-            pred = model(onehot(c))
-            # label loss rows: the usual batch, then (if on) the paired rows; mutated copies (if any) sit in between and have no labels
-            lab = torch.cat([torch.arange(len(idx)), n_main + torch.arange(2 * args.pair_batch)]).to(device) if pair_var is not None \
-                else torch.arange(len(idx), device=device)
-            loss = masked_mse(pred[lab], target)  # mean per output over its measured rows, then over outputs
+    egen = torch.Generator().manual_seed(args.seed + EVOAUG_SALT)  # its own stream: the main batches are unchanged
+    sizes = {"inversion": args.evoaug_inv, "deletion": args.evoaug_del, "translocation": args.evoaug_trans,
+             "insertion": args.evoaug_ins, "mutation": args.evoaug_mut}
+    total_epochs = args.epochs + args.finetune_epochs
+    log, best, t0, step, epoch = [], -1.0, time.time(), 0, 0
+    for stage, stage_epochs in (("main", args.epochs), ("finetune", args.finetune_epochs)):
+        step = 0  # --max_steps counts per stage
+        if stage == "finetune" and stage_epochs:
+            for g in opt.param_groups:
+                g["lr"] = args.finetune_lr  # constant; the one-cycle schedule has ended and is not stepped any more
+        for _ in range(stage_epochs):
+            epoch += 1
+            order, losses, pair_losses = torch.randperm(len(x_tr), generator=gen), [], []
+            for i in range(0, len(order), args.batch):
+                idx = order[i : i + args.batch]
+                c = x_tr[idx]
+                if args.evoaug and stage == "main":
+                    c = evoaug_batch(c, args.evoaug, args.evoaug_hard, sizes, egen)
+                if args.shift:
+                    c = flank_shift(c, args.shift, flank, gen)
+                if teachers and args.mut:
+                    c = torch.cat([c, mutate(c, args.mut, gen)])
+                target = y_tr[idx]
+                if pair_var is not None:  # both versions of --pair_batch random variants, same slide, appended to the batch
+                    pc, p1, p2 = draw_pairs(x_tr, lenti_rows, n_var, args.pair_batch, args.shift, flank, pgen)
+                    n_main = len(c)
+                    c = torch.cat([c, pc])
+                    target = torch.cat([target, y_tr[torch.cat([p1, p2])]])
+                c, target = c.to(device), target.to(device)
+                if torch.rand(1, generator=gen).item() < 0.5:  # one strand for the whole batch, so also for both versions of a pair
+                    c = reverse_complement_codes(c)
+                pred = model(onehot(c))
+                # label loss rows: the usual batch, then (if on) the paired rows; mutated copies (if any) sit in between and have no labels
+                lab = torch.cat([torch.arange(len(idx)), n_main + torch.arange(2 * args.pair_batch)]).to(device) if pair_var is not None \
+                    else torch.arange(len(idx), device=device)
+                loss = masked_mse(pred[lab], target)  # mean per output over its measured rows, then over outputs
+                if pair_var is not None:
+                    ppred = pred[n_main:, len(CELLS):]
+                    dp = ppred[args.pair_batch:] - ppred[: args.pair_batch]
+                    yp = target[len(idx):, len(CELLS):]
+                    dy = yp[args.pair_batch:] - yp[: args.pair_batch]
+                    ok = ~torch.isnan(dy)
+                    per = (torch.where(ok, (dp - torch.nan_to_num(dy)) ** 2, torch.zeros_like(dy)).sum(0)) / ok.sum(0).clamp(min=1) / pair_var.to(device)
+                    pair_term = per[ok.sum(0) > 0].mean() if ok.any() else loss.new_zeros(())
+                    pair_losses.append(pair_term.item())
+                    loss = loss + args.pair_loss * pair_term
+                if teachers:  # the teachers' averaged prediction, all outputs, pieces and changed copies
+                    loss = loss + args.lam * torch.nn.functional.mse_loss(pred, teach(c))
+                opt.zero_grad()
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                opt.step()
+                if stage == "main":
+                    sched.step()
+                losses.append(loss.item())
+                step += 1
+                if args.max_steps and step >= args.max_steps:
+                    break
+            r = {c: element_pearson(val[c], predict_multi(model, x_val[c], device)[:, k]) for k, c in enumerate(CELLS)}
+            mean_r = float(np.mean(list(r.values())))
+            entry = {"epoch": epoch, "train_loss": float(np.mean(losses)), "validation_element_pearson": r, "mean": mean_r}
+            if args.finetune_epochs:
+                entry["stage"] = stage
+            if epoch % 5 == 0 or epoch == total_epochs or args.max_steps:  # the new practice chromosomes: logged, not used for choices here
+                entry["practice_variants"] = practice_readout(both_orientations(model, pr.seq1, device), both_orientations(model, pr.seq2, device), pr, readout)
             if pair_var is not None:
-                ppred = pred[n_main:, len(CELLS):]
-                dp = ppred[args.pair_batch:] - ppred[: args.pair_batch]
-                yp = target[len(idx):, len(CELLS):]
-                dy = yp[args.pair_batch:] - yp[: args.pair_batch]
-                ok = ~torch.isnan(dy)
-                per = (torch.where(ok, (dp - torch.nan_to_num(dy)) ** 2, torch.zeros_like(dy)).sum(0)) / ok.sum(0).clamp(min=1) / pair_var.to(device)
-                pair_term = per[ok.sum(0) > 0].mean() if ok.any() else loss.new_zeros(())
-                pair_losses.append(pair_term.item())
-                loss = loss + args.pair_loss * pair_term
-            if teachers:  # the teachers' averaged prediction, all outputs, pieces and changed copies
-                loss = loss + args.lam * torch.nn.functional.mse_loss(pred, teach(c))
-            opt.zero_grad()
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            opt.step()
-            sched.step()
-            losses.append(loss.item())
-            step += 1
+                entry["pair_loss"] = float(np.mean(pair_losses))
+            entry["minutes"] = (time.time() - t0) / 60
+            log.append(entry)
+            print(f"  epoch {epoch:>2}" + (f" [{stage}]" if args.finetune_epochs else "") + f": loss {entry['train_loss']:.4f}" + (f" (pair term {entry['pair_loss']:.4f})" if "pair_loss" in entry else "") + ", fold 9 " + ", ".join(f"{c} {v:.3f}" for c, v in r.items())
+                  + f", mean {mean_r:.3f}" + ("; practice variants " + ", ".join(f"{k} act {v['activity']:.3f} eff {v['effect']:.3f}"
+                                              for k, v in entry["practice_variants"].items()) if "practice_variants" in entry else "")
+                  + f", {entry['minutes']:.1f} min", flush=True)
+            if mean_r > best:
+                best = mean_r
+                torch.save(model.state_dict(), run_dir / "best.pt")
+            (run_dir / "log.json").write_text(json.dumps({"config": config, "log": log}, indent=1))
             if args.max_steps and step >= args.max_steps:
                 break
-        r = {c: element_pearson(val[c], predict_multi(model, x_val[c], device)[:, k]) for k, c in enumerate(CELLS)}
-        mean_r = float(np.mean(list(r.values())))
-        entry = {"epoch": epoch, "train_loss": float(np.mean(losses)), "validation_element_pearson": r, "mean": mean_r}
-        if epoch % 5 == 0 or epoch == args.epochs or args.max_steps:  # the new practice chromosomes: logged, not used for choices here
-            entry["practice_variants"] = practice_readout(both_orientations(model, pr.seq1, device), both_orientations(model, pr.seq2, device), pr, readout)
-        if pair_var is not None:
-            entry["pair_loss"] = float(np.mean(pair_losses))
-        entry["minutes"] = (time.time() - t0) / 60
-        log.append(entry)
-        print(f"  epoch {epoch:>2}: loss {entry['train_loss']:.4f}" + (f" (pair term {entry['pair_loss']:.4f})" if "pair_loss" in entry else "") + ", fold 9 " + ", ".join(f"{c} {v:.3f}" for c, v in r.items())
-              + f", mean {mean_r:.3f}" + ("; practice variants " + ", ".join(f"{k} act {v['activity']:.3f} eff {v['effect']:.3f}"
-                                          for k, v in entry["practice_variants"].items()) if "practice_variants" in entry else "")
-              + f", {entry['minutes']:.1f} min", flush=True)
-        if mean_r > best:
-            best = mean_r
-            torch.save(model.state_dict(), run_dir / "best.pt")
-        (run_dir / "log.json").write_text(json.dumps({"config": config, "log": log}, indent=1))
-        if args.max_steps and step >= args.max_steps:
-            break
     print(f"done in {(time.time() - t0) / 60:.0f} min: best fold-9 mean Pearson {best:.3f}", flush=True)
 
 
