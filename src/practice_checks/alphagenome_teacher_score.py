@@ -24,7 +24,14 @@ STUDENTS = ["more_HEPG2-K562-SKNSH-HCT116-A549_distill_t3_lam1.0_mut0.05_e25_see
 
 
 def main():
-    ag, mp = np.load(sys.argv[1]), np.load(sys.argv[2])
+    raw, mp = np.load(sys.argv[1]), np.load(sys.argv[2])
+
+    def f32(a):  # AlphaGenome runs in bfloat16; numpy stores it as raw 2-byte values ('V2')
+        a = np.asarray(a)
+        if a.dtype.kind == "V" and a.dtype.itemsize == 2:
+            return (a.view(np.uint16).astype(np.uint32) << 16).view(np.float32)
+        return a.astype(np.float32)
+    ag = {k: f32(raw[k]) for k in raw.files}
     full = pd.read_parquet("data/more_data/practice.parquet")
     sel = np.flatnonzero((full.chr.astype(str) == "13").to_numpy())
     pr = full.iloc[sel].reset_index(drop=True)
