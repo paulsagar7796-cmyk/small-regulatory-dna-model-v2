@@ -62,8 +62,8 @@ FILES = {"train": "train.parquet", "practice": "practice13.parquet", "mutants": 
          "lenti_excluded": "lentimpra_excluded.parquet",
          "ag": "teacher_ag_train.npz", "mpac": "teacher_mpac.npz", "ag_mut": "teacher_ag_mutants.npz"}
 # (file key, array name) per teacher; {cell} and {v} are filled in with TEACHER_CELL_NAMES and 1 / 2
-NPZ_KEYS = {"ag": ("ag", "{cell}_v{v}"), "mpac": ("mpac", "{cell}_v{v}"),
-            "ag_mut": ("ag_mut", "{cell}_v{v}"), "mpac_mut": ("mpac", "{cell}_v{v}_mut")}
+NPZ_KEYS = {"ag": ("ag", "{cell}_v{v}"), "mpac": ("mpac", "train_{cell}_v{v}"),
+            "ag_mut": ("ag_mut", "{cell}_v{v}"), "mpac_mut": ("mpac", "mutants_{cell}_v{v}")}  # label_mpac.py writes <part>_<cell>_v<n>
 TEACHER_CELL_NAMES = {"HEPG2": "HepG2", "K562": "K562", "SKNSH": "SKNSH"}  # our cell name -> the cell name inside the array names
 # ---------------------------------------------------------------------------------
 
