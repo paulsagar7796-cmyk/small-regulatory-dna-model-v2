@@ -1,0 +1,52 @@
+{
+ "usable_single_letter_variants": 281325,
+ "by_part_before_guards": {
+  "train": 257652,
+  "locked": 15979,
+  "practice": 7694
+ },
+ "removed_scan_neighbours_all_parts": 522,
+ "of_which_within_200_letters": 193,
+ "removed_scan_neighbours_by_part": {
+  "train": 483,
+  "locked": 30,
+  "practice": 9
+ },
+ "removed_train_same_dna_as_chr7_or_chr13_variants": 26611,
+ "removed_train_same_dna_as_lentimpra_fold_9_10": 10217,
+ "train_removed_by_any_guard": 29824,
+ "by_part_after_guards": {
+  "train": 227828,
+  "locked": 15949,
+  "practice": 7685
+ },
+ "lentimpra_training_pieces_removed": 4022,
+ "lentimpra_training_pieces_total": 276476,
+ "written": {
+  "train": 227828,
+  "practice13": 7685,
+  "train_chromosomes": [
+   "1",
+   "10",
+   "11",
+   "12",
+   "14",
+   "15",
+   "16",
+   "17",
+   "18",
+   "19",
+   "2",
+   "20",
+   "21",
+   "22",
+   "3",
+   "4",
+   "5",
+   "6",
+   "8",
+   "9",
+   "X"
+  ]
+ }
+}
