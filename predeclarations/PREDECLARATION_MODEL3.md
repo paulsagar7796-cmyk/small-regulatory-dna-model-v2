@@ -22,7 +22,7 @@ The maintainer reports written permission from Google DeepMind to train a studen
 
 ## Pilots (practice chromosome 13 only; one seed each)
 - **P0:** lab labels + teacher mix, plain average (model 2's recipe with precomputed teacher labels).
-- **P1:** P0 + (1) per-piece blend of lab label and teacher by reliability (lab standard error against the teacher's error measured on training chromosomes), (3) mutated copies taught by the teacher mix only, (5) an extra loss on the measured effect (version 2 minus version 1).
+- **P1:** P0 + (1) per-piece blend of lab label and teacher by reliability (lab standard error against the teacher's error measured on training chromosomes), (3) mutated copies taught by the teacher mix only. (An extra loss on the measured effect was considered and left out: the same idea, the paired-effect loss of model 3 screen (a), lowered every practice measure; `results/SCREEN_M3.md`.)
 - **P2:** P1 + (2) the teacher term dropped where it disagrees with a precise measurement by more than a fixed multiple of the error bar, (4) the teacher term down-weighted where AG and MPAC disagree.
 - The best pilot on chromosome 13 (effect Pearson, mean of HepG2 and K562, active variants) is then trained at about 4M parameters; the better size gets a second seed. The student is fixed in this file before chromosome 7 is written.
 
