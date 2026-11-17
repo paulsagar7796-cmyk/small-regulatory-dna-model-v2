@@ -1,118 +1,143 @@
-# small-regulatory-dna-model-v2
+# Cislume Dibang (model 2)
 
-**Model 2, the "more data" route. Locked test passed (16 Nov 2026); weights not yet released.** This repository continues [small-regulatory-dna-model](https://github.com/paulsagar7796-cmyk/small-regulatory-dna-model) (model 1), the lab's released 1.3M-parameter model of regulatory DNA activity.
+**A 1.3-million-parameter model that reads a 200-letter piece of human DNA and predicts how strongly it switches on a reporter gene in a reporter assay (MPRA), in several kinds of human cell. It also predicts the effect of changing any single letter.**
 
-From [PurvoLabs](https://github.com/PurvoLabs).
+Cislume Dibang is one network of 1,324,264 parameters. It was trained on two public sets of lab measurements: the lentiMPRA tables of Agarwal and others (Nature 2025), and the natural-variant plasmid MPRA of Siraj and others (Nature 2026), in which both versions of about 280,000 single-letter variants were measured. It was then taught by three trained copies of itself (self-distillation). On a pre-declared, one-shot, blind test it predicts the effect of single-letter variants clearly better than its predecessor, Cislume Lohit (model 1), and the published MPRA-LegNet model.
 
-## Result of the locked test (run once, 16 Nov 2026)
+From [PurvoLabs](https://github.com/PurvoLabs), an independent research lab in Assam, India.
 
-Chromosomes 5, 14, 22, 29,397 variants. Pearson correlation between measured and predicted effect of a single-letter variant, mean of HepG2 and K562:
+> **Status (November 2026):** research release, not peer reviewed. The outputs are predictions of a lab reporter measurement in cell lines. They are not clinical evidence.
+
+**The name.** *Cislume* = "cis" (cis-regulatory DNA: the switches that sit next to genes) + "lume" (light: a reporter assay reads out how strongly a piece of DNA switches on a reporter gene). Lohit and Dibang are two rivers of Assam that join the Siang near Sadiya to form the Brahmaputra. The Dibang carries more water, as model 2 learned from more data.
+
+## Quick start
+
+```bash
+pip install -r requirements.txt   # versions used for the reported results (Python 3.13)
+
+python predict.py --seq <200 letters>                        # activity of one piece
+python predict.py --fasta pieces.fa --out activity.tsv        # activity of many pieces
+python predict.py --fasta pieces.fa --scan --out effects.tsv  # effect of every single-letter change
+```
+
+Run from the repository root. Each piece must be exactly 200 letters of A, C, G, T.
+
+| Output column | What it estimates |
+|---|---|
+| `plasmid_HepG2`, `plasmid_K562`, `plasmid_SKNSH`, `plasmid_HCT116`, `plasmid_A549` | log2FC in the plasmid MPRA of Siraj and others (Nature 2026). These outputs are behind the single-letter results below |
+| `lenti_HepG2`, `lenti_K562`, `lenti_WTC11` | log2(RNA / DNA) in the lentiMPRA of Agarwal and others (Nature 2025), as for Cislume Lohit |
+
+With `--scan`, the effect of a change is the activity of the changed piece minus the activity of the original. Each piece is placed between the two 15-letter adapters used in training and scored in both orientations, which are averaged: the recipe of every test in this repository.
+
+The weights are in `weights/` (two students, plus `normalisation.json` for the output scales). By default `predict.py` uses the main student, the model behind the reported numbers; `--both` averages the two students. Scoring the practice chromosomes with the released main student reproduces its recorded practice score (0.5838) exactly.
+
+## Result of record: the locked test
+
+Run once on 16 November 2026, after the pass marks were confirmed by the maintainer and the model was fixed ([predeclarations/PREDECLARATION_MORE_DATA.md](predeclarations/PREDECLARATION_MORE_DATA.md)). Blind: no model and no choice of ours had seen these chromosomes.
+
+**Data:** chromosomes 5, 14 and 22 of the natural-variant table, 29,397 variants. **Measure:** Pearson correlation between the measured effect of a variant (version 2 minus version 1) and the predicted effect, over variants with at least one active version (5,800 in HepG2, 6,081 in K562), mean of the two cell types. **Intervals:** 2,000 bootstrap resamples of 100,000-letter genome blocks.
 
 | Model | Mean | HepG2 | K562 |
 |---|---|---|---|
-| **Model 2** | **0.594** (seed 2: 0.592) | 0.632 | 0.555 |
-| Model 1 (released) | 0.508 (seed 2: 0.508) | 0.543 | 0.472 |
+| **Cislume Dibang (model 2)** | **0.594** (seed 2: 0.592) | 0.632 | 0.555 |
+| Cislume Lohit (model 1) | 0.508 | 0.543 | 0.472 |
 | Published MPRA-LegNet | 0.466 | 0.487 | 0.444 |
-| 6-letter-word baseline | 0.319 | 0.349 | 0.290 |
+| 6-letter-word ridge baseline | 0.319 | 0.349 | 0.290 |
 
-Gain over model 1: **0.086 (95% interval 0.074 to 0.099)**. All four pass marks, confirmed before the test, are met. Full report with limits: [results/locked/REPORT.md](results/locked/REPORT.md). The locked chromosomes are now closed.
+Gain over Cislume Lohit: **0.086 (95% interval 0.074 to 0.099)**. All four pre-declared marks were met: the interval of the gain is above zero; the gain is at least 0.06; neither cell type is more than 0.01 below Cislume Lohit (both are well above it); the two seeds differ by 0.001 (at most 0.02 allowed). Also reported beside the test: SK-N-SH effect 0.568, and 0.565 against 0.485 on variants whose pieces share no 24-letter word with any training piece. Full report: [results/locked/REPORT.md](results/locked/REPORT.md). The locked chromosomes are now closed.
 
-**Correction (16 Nov 2026).** A flaw in the leak guard left near-copies of 3,277 of the 29,397 locked variants in the training table. Re-scored once on the variants without a near-copy (5,259 HepG2 / 5,389 K562), model 2 scores **0.590** (seed 2: 0.588) against model 1 0.510, published MPRA-LegNet 0.468 and the baseline 0.319. Gain over model 1: **0.080 (95% interval 0.068 to 0.094)**; all four pass marks still hold. The numbers above stay the test result of record; this is a post hoc correction. Details: [results/locked/REPORT.md](results/locked/REPORT.md#correction-2026-11-16-near-copies-in-training).
+### Correction: near-copies in training
 
-## Why a second model
+After the test we found a flaw in the leak guard: it checked only the first 8 pieces that contain each 24-letter word, so it missed some near-copies from repeated DNA. 3,277 of the 29,397 locked variants had a near-copy among the training pieces. The maintainer approved one re-score of the fixed models on the variants without a near-copy (5,259 HepG2 / 5,389 K562); no model or setting was chosen from it.
 
-Model 1 was trained on one public dataset (lentiMPRA, three cell types). After it was released we tried to push it further without new data, and every route was used up:
+| Variants | Cislume Dibang | Seed 2 | Cislume Lohit | Published MPRA-LegNet | Baseline | Gain over Cislume Lohit (95% interval) |
+|---|---|---|---|---|---|---|
+| All (the test of record) | 0.594 | 0.592 | 0.508 | 0.466 | 0.319 | 0.086 (0.074 to 0.099) |
+| Without a near-copy in training | 0.590 | 0.588 | 0.510 | 0.468 | 0.319 | 0.080 (0.068 to 0.094) |
 
-| What we tried on model 1 | Outcome |
-|---|---|
-| Changes to the network design (five of them) | No gain |
-| A 1.5 times wider network | Small gain on whole pieces only |
-| A second round of learning from our own trained models | No gain |
-| Averaging our four best models | +0.007 on single-letter changes, not clearly above zero |
+All four marks still hold on the corrected subset. The original number stays the result of record. Numbers: [results/locked/NEARCOPY_RESCORE.json](results/locked/NEARCOPY_RESCORE.json).
 
-All those models learned from the same data, so they share the same mistakes. The remaining route is **new training data**.
+## Comparison with MPAC
 
-## The plan
+MPAC (Butts and others, bioRxiv 2025, doi [10.1101/2025.04.16.648420](https://doi.org/10.1101/2025.04.16.648420)) was trained on the same family of experiments. For any chromosome it uses the 10 Malinois-design networks that never trained on it, each about 4.1 million parameters, so about 41 million parameters in total. We ran it once on the locked chromosomes under a rule recorded first ([predeclarations/REFERENCE_MPAC.md](predeclarations/REFERENCE_MPAC.md)).
 
-```mermaid
-flowchart LR
-    A["lentiMPRA tables<br/>model 1's data<br/>3 cell types"] --> M["One network<br/>same design and size as model 1<br/>8 outputs"]
-    B["Natural-variant MPRA table<br/>Siraj and others 2026<br/>about 209,000 variants, 2 versions each<br/>up to 5 cell types"] --> M
-    M --> P["Practice measures<br/>scan practice half<br/>chromosomes 6, 13, 20<br/>lentiMPRA fold 9"]
-    P --> L["Locked test<br/>chromosomes 5, 14, 22<br/>only after the pass marks are confirmed"]
-```
+| Locked chromosomes 5, 14, 22 | Mean | HepG2 | K562 |
+|---|---|---|---|
+| MPAC (10 networks, about 41M parameters) | 0.604 | 0.633 | 0.575 |
+| Cislume Dibang (1 network, 1.3M parameters) | 0.594 | 0.632 | 0.555 |
 
-- **Same network, more data.** The design and size of model 1, with five extra outputs for the new table's cell types (HepG2, K562, SK-N-SH, HCT116, A549).
-- **Why this table.** It holds about 280,000 single-letter variants, each measured as a pair: the piece with one letter, and the piece with the other. Model 1 never trained on a measured single-letter pair.
-- **A control run** trains on the lentiMPRA data alone with the same pieces removed, so the effect of the new data can be read cleanly.
+Cislume Dibang minus MPAC: 95% interval −0.019 to −0.001. **MPAC is narrowly ahead.** Declared deviation: we scored one centred 200-letter window per version, not the 18 shifted genome windows of the MPAC preprint, so our run may understate MPAC. MPAC was not re-scored on the near-copy-free subset. Numbers: [results/locked/MPAC_REFERENCE.json](results/locked/MPAC_REFERENCE.json).
 
-## The split (fixed before any model was trained on the new table)
+**Practice data only, not a test** (practice chromosomes 6, 13, 20; [results/SCREEN_M3.md](results/SCREEN_M3.md), section "Practice checks without training"). Scored one at a time, a single MPAC network reaches 0.578 to 0.588 (mean 0.583), the same as Cislume Dibang's 0.584 at about a third of the size. MPAC's lead comes from averaging ten networks: its members' predicted effects agree less with each other (mean pairwise Pearson 0.908) than our seeds do (0.958), so averaging them gains more (average of 10: 0.609).
+
+## Further one-time tests
+
+Each was run once on 17 November 2026 under rules recorded first ([predeclarations/EXTRA_TESTS_MODEL2.md](predeclarations/EXTRA_TESTS_MODEL2.md)). Nothing was chosen or changed from them. **Only TraitGym is blind**; the other three re-read data used before. Report: [results/extra_tests/REPORT.md](results/extra_tests/REPORT.md).
+
+| Test | Cislume Dibang | Cislume Lohit | Published MPRA-LegNet | Reading |
+|---|---|---|---|---|
+| lentiMPRA fold 10, whole pieces (lentiMPRA outputs; mean Pearson over HepG2, K562, WTC11) | 0.837 | 0.842 | 0.818 | Slightly below Cislume Lohit (interval of the difference −0.008 to −0.001), still ahead of the published model |
+| Saturation scan of Siraj and others, locked half (every single-letter change in 56 pieces) | 0.718 | 0.625 | 0.588 | Gain over Cislume Lohit 0.071 to 0.116; same lab method as the training data |
+| Four Kircher 2019 saturation-mutagenesis elements (F9, LDLR, SORT1, PKLR) | 0.656 | 0.639 | 0.594 | About level on average (interval 0.000 to 0.033); better on F9 and PKLR, worse on LDLR and SORT1 |
+| TraitGym Mendelian, zero-shot (pooled AUPRC; random about 0.10) | 0.259 | 0.267 | | Far below CADD (0.694). Cislume Dibang is not a disease-variant scorer |
+
+## How it was trained
+
+- **Design:** the published MPRA-LegNet network with one shared body and eight outputs (three lentiMPRA cell types, five plasmid-MPRA cell types). Same design and size as Cislume Lohit, apart from the extra outputs.
+- **Data:** the lentiMPRA training folds, plus both versions of 208,783 natural variants (417,566 pieces) from the training chromosomes of the Siraj table.
+- **Split, fixed before any training on the new table:**
 
 | Part | Chromosomes | Variants | Use |
 |---|---|---|---|
 | Training | all others | 208,783 | Training |
 | Practice | 6, 13, 20 | 28,104 | Every choice |
-| Locked | 5, 14, 22 | 29,397 | One test, run on 16 Nov 2026 after the marks were confirmed and the model was fixed. Now closed |
+| Locked | 5, 14, 22 | 29,397 | The one test above; now closed |
 
-Leak guards remove pieces that are the same DNA across parts, and everything next to model 1's single-letter test pieces. Details and counts: `src/prepare_more_data.py`, `results/split_counts.json`.
+- **Leak guards** remove training pieces that are the same DNA as a practice or locked piece, and variants next to the saturation-scan pieces (`src/prepare_more_data.py`, counts in `results/split_counts.json`; see the correction above).
+- **Self-distillation:** three copies trained from different seeds (20261113, 2, 3) teach one student of the same size, which learns from the lab labels plus the teachers' average, also on mutated copies of the pieces. The released students are seeds 20261113 (main) and 2.
+- On practice data the new table did the main work: a control trained without it scored 0.473 on the practice chromosomes, the untaught model 0.573, the taught model 0.584 ([results/locked/REPORT.md](results/locked/REPORT.md), section "What helped").
 
-## What model 2 has to beat (practice chromosomes 6, 13, 20; practice numbers, not test results)
+## Limits
 
-Pearson correlation between measured and predicted effect of a single-letter variant, over variants where at least one version is active, mean of HepG2 and K562:
+- **Same-assay advantage.** Cislume Dibang was trained on the same lab method and laboratory as the test labels. Cislume Lohit and MPRA-LegNet were not. Part of the gain may come from learning this assay's quirks. The honest claim is **"a better small model with more data"**, not "same data, better training".
+- **One table, one split.** The result rests on one study's table and one choice of locked chromosomes.
+- **Most natural variants have small effects**, so the correlation leans on a minority of larger effects.
+- **Coordinates.** The `pos` column of the natural-variant table (and the scan identifiers) is hg19, not hg38. Matching against hg38 coordinates needs a liftover.
+- **Research use only.** The model predicts a lab measurement in cell lines. It says nothing validated about disease risk in a person, and it is not for clinical use.
 
-| Model | Effect of the variant | Activity of the pieces |
+## Data and licences
+
+No data is stored in this repository. Everything is public and is downloaded into `data/` (ignored by git). Full list: [DATA.md](DATA.md).
+
+| Data | Source | Licence, as stated by the source |
 |---|---|---|
-| Model 1 (released) | 0.491 (seed 2: 0.484) | 0.610 |
-| Published MPRA-LegNet | 0.455 | 0.584 |
-| 6-letter-word baseline | 0.313 | 0.407 |
+| lentiMPRA activity tables (Agarwal and others, Nature 2025) | `datasets/original/` in [github.com/autosome-ru/human_legnet](https://github.com/autosome-ru/human_legnet) | MIT (repository) |
+| Published MPRA-LegNet weights (comparison model) | [zenodo.org/records/10558183](https://zenodo.org/records/10558183) | CC BY 4.0 |
+| Supplementary tables of Siraj and others (natural variants, saturation scan) | Europe PMC, article PMC11100724 | CC BY-NC (preprint) |
+| Saturation mutagenesis of regulatory elements (Kircher and others 2019) | The study's Open Science Framework project | See the source |
+| Human reference genome hg38 (only for the Kircher test) | UCSC | UCSC terms |
 
-On model 1's other practice measure (the saturation scan's practice half) model 1 scores 0.627.
+Check each source before reusing its data. `src/third_party/legnet_model.py` is copied from the MPRA-LegNet repository and stays under its MIT licence. `src/third_party/modeling_mpac.py` is third-party code (MIT, as stated in its header), used only for the MPAC reference run.
 
-## First practice result (one seed)
+**Licence of this repository and the weights:** to be decided.
 
-Pearson correlation, practice data only, one seed (20261113). Not test results.
-
-| Model | Scan practice half | Natural variants (chr 6, 13, 20) | lentiMPRA fold 9 |
-|---|---|---|---|
-| Model 1 (released) | 0.627 | 0.491 | 0.842 |
-| Control (lentiMPRA only, same removals) | 0.595 | 0.473 | 0.824 |
-| Model 2, new outputs | 0.687 | 0.573 | 0.829 |
-
-The new data clearly improves single-letter accuracy on both practice measures, with intervals of the difference from model 1 above zero. Whole-piece accuracy on lentiMPRA was slightly below model 1 before the self-distillation step; after it, model 2 scores 0.844 on fold 9 (seed 2: 0.840). Part of the gain may come from training on the same laboratory's assay. Full record: [results/PRACTICE_RUN_1.md](results/PRACTICE_RUN_1.md).
-
-## Status
-
-| Step | Status |
-|---|---|
-| Split and leak guards | Done, 14 Nov 2026 |
-| Pre-declaration ([predeclarations/PREDECLARATION_MORE_DATA.md](predeclarations/PREDECLARATION_MORE_DATA.md)) | CONFIRMED, 15 Nov 2026 (gain mark raised by the maintainer from 0.03 to 0.06) |
-| Reference numbers for model 1 on the practice chromosomes | Done (table above) |
-| First practice runs: model 2 and the control | Done, 14 Nov 2026 ([results/PRACTICE_RUN_1.md](results/PRACTICE_RUN_1.md)) |
-| Second and third seeds of model 2 | Done, 15 Nov 2026 |
-| Read-out (new outputs) and self-teaching step chosen on practice data; model fixed | Done, 15 Nov 2026 |
-| Locked test | **Done, 16 Nov 2026: PASS on all four marks** ([results/locked/REPORT.md](results/locked/REPORT.md)) |
-| Release of model 2 weights | To do |
-
-## Honest framing, decided in advance
-
-Model 2 passed, so the claim is **"a better small model with more data"**. It is not a same-data comparison: model 2 has seen the test's assay and laboratory during training, and model 1 and the published model have not. Other groups have trained models on this family of data (Malinois, MPAC); we have not run them and make no claim against them.
-
-The leak guard missed some near-copies in repeated DNA; the locked result corrected for this is 0.590, gain 0.080 (see the correction above). The MPAC comparison and the scan practice numbers were not corrected.
-
-## Layout
+## Repository layout
 
 | Path | What |
 |---|---|
+| `predict.py` | Predictions from the released weights |
+| `weights/` | The two released students and the output scaling |
 | `src/prepare_more_data.py` | The split and the leak guards |
-| `src/train_more_data.py` | Trains model 2 (and the control with `--new_cells none`) |
-| `src/evaluate_practice.py` | Scores a run on practice data beside model 1 and the published model |
-| `predeclarations/` | The confirmed rules for the locked test |
-| `src/evaluate_locked.py` | The locked test (run once) |
-| `results/` | Result files as they are produced |
-| other files in `src/` | Model 1's code, which model 2 builds on |
+| `src/train_more_data.py` | Training (and the control with `--new_cells none`) |
+| `src/evaluate_practice.py`, `src/evaluate_locked.py` | Practice scoring and the locked test (run once) |
+| `predeclarations/` | Rules recorded before each test |
+| `results/` | Result files and reports |
+| other files in `src/` | Cislume Lohit's code, which this model builds on |
 
-Model 1's weights are read through a local link (`released_weights`) to the first repository's `weights/` folder. Data sources: [DATA.md](DATA.md).
+## Related
 
-## Safety, maintainer, licence
+- **Predecessor:** [Cislume Lohit (model 1)](https://github.com/paulsagar7796-cmyk/small-regulatory-dna-model), the same network trained on the lentiMPRA tables only ("same data, better training").
 
-This model scores DNA. It does not generate DNA. **Maintainer:** [ORCID 0009-0007-7020-8949](https://orcid.org/0009-0007-7020-8949). **Licence:** not chosen yet; `src/third_party/legnet_model.py` stays under its MIT licence. The code and text were produced with an AI coding assistant (Claude), directed and checked by the maintainer.
+## Safety and maintainer
+
+This model scores DNA. It does not generate DNA. **Maintainer:** [ORCID 0009-0007-7020-8949](https://orcid.org/0009-0007-7020-8949).
