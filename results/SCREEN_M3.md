@@ -38,3 +38,14 @@ One change at a time against untaught model 2. Read-out: the new outputs. Practi
 Note: the reference runs' training table has the cap-8 leak-guard flaw (near-copies of practice pieces in training, worth about 0.007 on the taught model's practice score); the extra pieces were filtered with the exact guard.
 
 Result files: `results/practice/more_HEPG2-K562-SKNSH-HCT116-A549_pair*.json`.
+
+## Practice checks without training (2026-11-17, practice chromosomes 6, 13, 20 only; scripts in `src/practice_checks/`, run from the repo root)
+
+| Check | Result |
+|---|---|
+| Test-time slide averaging (4 or 8 slides of 0 to 21 letters, as in training) | taught model 2 0.584 -> 0.586 (CI of gain +0.001 to +0.003); untaught 0.573 -> 0.574; wide 0.582 -> 0.583. Real but negligible. |
+| MPAC's 10 clean networks scored one at a time (same single centred window as our reference run) | single networks 0.578 to 0.588, mean **0.583**; average of the first 2 / 3 / 5 / 10: 0.601 / 0.604 / 0.608 / **0.609** (reproduces the reference run). |
+| Model 2 (taught) averaged with MPAC (z-scored effects) | 0.608; with both taught seeds 0.609; MPAC alone 0.609 (CI of the difference -0.004 to +0.005). No gain. |
+| How alike are ensemble members' predicted effects (mean pairwise Pearson, active variants) | MPAC members **0.908**; our three untaught seeds **0.958** (three-seed average gains +0.008, MPAC's first three +0.021). |
+
+**Reading:** one MPAC network (4.1M parameters) scores the same as one taught model 2 (1.3M, 0.584). MPAC's whole lead on this measure comes from averaging ten networks that disagree more than our seeds do. MPAC's members differ in their training data (each holds out a different validation chromosome pair) and recipe; ours differ only in seed. Which of these causes the extra diversity is not tested. Adding our model to MPAC gives nothing, so MPAC plus model 2 is not a stronger teacher than MPAC alone.
