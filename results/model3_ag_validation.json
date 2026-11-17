@@ -1,0 +1,9 @@
+{
+ "rows": 300,
+ "max_abs": 0.015625,
+ "mean_abs": 0.0008525594021193683,
+ "max_rel": 0.003846153849735856,
+ "frac_within_2_bf16_roundings": 1.0,
+ "frac_within_4_bf16_roundings": 1.0,
+ "pearson": 0.999997067718841
+}
