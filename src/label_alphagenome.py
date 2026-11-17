@@ -57,13 +57,20 @@ def hf_login() -> None:
         try:
             from kaggle_secrets import UserSecretsClient
             token = UserSecretsClient().get_secret("HF_TOKEN")
-        except Exception:  # noqa: BLE001  (not on Kaggle, or the secret is not attached: a cached local login may still work)
+        except Exception as e:  # noqa: BLE001  (not on Kaggle, or the secret is not attached: a cached local login may still work)
+            print(f"Kaggle secret HF_TOKEN not available: {type(e).__name__}: {str(e)[:200]}", flush=True)
             token = None
     if token:
         import huggingface_hub
         huggingface_hub.login(token=token, add_to_git_credential=False)
         os.environ["HF_TOKEN"] = token
         print("Hugging Face login done (token not shown)", flush=True)
+        try:
+            print("Hugging Face account:", huggingface_hub.whoami().get("name"), flush=True)
+        except Exception as e:  # noqa: BLE001
+            print(f"whoami failed: {type(e).__name__}", flush=True)
+    else:
+        print("No Hugging Face token found (env HF_TOKEN or Kaggle secret HF_TOKEN)", flush=True)
 
 
 def load_cell(cell: str):
