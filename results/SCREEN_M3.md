@@ -18,6 +18,8 @@ One change at a time against untaught model 2. Read-out: the new outputs. Practi
 | (e) Malinois design (MPAC's body, 5.0M, random start), our recipe | 20261113 | 0.472 | 0.580 | 0.755 |
 | (e) same | 2 | 0.484 | 0.580 | 0.758 |
 | (e) same, peak learning rate 0.003 | 20261113 | 0.521 | 0.598 | 0.790 |
+| (f) Malinois noise filter: drop new-table pieces with largest SE >= 1.0 (18,101 of 417,566) | 20261113 | 0.575 | 0.683 | 0.831 |
+| (g) Malinois duplication: second copy of new-table pieces with largest log2FC >= 0.5 (201,135) | 20261113 | 0.572 | 0.679 | 0.832 |
 
 **Reading (2026-11-16):** the paired-effect loss lowers every measure in both seeds: closed, no gain. The control shows the extra paired rows alone do no harm (0.578 against 0.573, one seed, within what one seed can show), so the loss term is what hurts.
 
@@ -28,6 +30,10 @@ One change at a time against untaught model 2. Read-out: the new outputs. Practi
 (d) EvoAug-style augmentation (deletions, insertions, inversions, rolls, letter swaps, then clean fine-tuning) lowers every measure, more so in the heavier setting: closed, no gain. The model looks limited by capacity, not by overfitting.
 
 (e) The Malinois design trained with our data and recipe is far below our own design. A lower learning rate helps (0.472 to 0.521), and fold 9 was still rising at the last epoch in all three runs, so these runs are undertrained; but even the best is 0.05 below a network a quarter of its size. Closed for now: MPAC's strength does not transfer by swapping in its body.
+
+(f), (g) (2026-11-17) Two data rules from the Malinois recipe (Gosai and others 2024, Methods), each alone on our design: dropping noisy pieces gives 0.575 / 0.683 / 0.831, duplicating active pieces 0.572 / 0.679 / 0.832, against 0.573 / 0.679 to 0.687 / 0.829 to 0.833. Both are within seed noise: closed, no gain, so no second seed was run. Neither rule explains MPAC's lead.
+
+**Screen summary after (a) to (g):** of seven changes only the wider body helped (+0.009, one seed). Averaging all ten of our models gives 0.589. MPAC scores 0.609 on the practice chromosomes.
 
 Note: the reference runs' training table has the cap-8 leak-guard flaw (near-copies of practice pieces in training, worth about 0.007 on the taught model's practice score); the extra pieces were filtered with the exact guard.
 
