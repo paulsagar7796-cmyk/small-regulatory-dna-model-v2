@@ -30,7 +30,10 @@ def load(cell: str):
     root = download(f"Gosai-{cell}-optimal")
     cfg = json.loads((root / "stage2" / "config.json").read_text())
     print(f"[{cell}] config:", json.dumps(cfg)[:1500], flush=True)
-    return load_pretrained(f"Gosai-{cell}-optimal", stage="stage2"), cfg
+    # base AlphaGenome weights from Hugging Face (gated; the loader's default fetches them from Kaggle instead)
+    from huggingface_hub import snapshot_download
+    base = snapshot_download("google/alphagenome-all-folds")
+    return load_pretrained(f"Gosai-{cell}-optimal", stage="stage2", base_checkpoint_path=base), cfg
 
 
 def predictor(model, head_name: str, batch: int = 32):
@@ -59,6 +62,9 @@ def predictor(model, head_name: str, batch: int = 32):
                                      strand_reindexing=jax.device_put(model._metadata[organism].strand_reindexing,
                                                                       model._device_context._device))
             h = np.array(out[head_name])
+            if h.ndim <= 2:  # the Gosai (boda-flatten) head already returns one value per sequence
+                out_all.append(h.reshape(n, -1)[:, 0])
+                continue
             L = h.shape[1]
             if pooling == "flatten":
                 p = h.squeeze(1)
