@@ -15,6 +15,9 @@ One change at a time against untaught model 2. Read-out: the new outputs. Practi
 | (d) EvoAug-style augmentation, exactly 2 per piece, 5 clean epochs | 20261113 | 0.549 | 0.653 | 0.808 |
 | (d) same | 2 | 0.545 | 0.652 | 0.804 |
 | (d) 0 to 2 per piece, 5 clean epochs | 20261113 | 0.558 | 0.666 | 0.821 |
+| (e) Malinois design (MPAC's body, 5.0M, random start), our recipe | 20261113 | 0.472 | 0.580 | 0.755 |
+| (e) same | 2 | 0.484 | 0.580 | 0.758 |
+| (e) same, peak learning rate 0.003 | 20261113 | 0.521 | 0.598 | 0.790 |
 
 **Reading (2026-11-16):** the paired-effect loss lowers every measure in both seeds: closed, no gain. The control shows the extra paired rows alone do no harm (0.578 against 0.573, one seed, within what one seed can show), so the loss term is what hurts.
 
@@ -23,6 +26,8 @@ One change at a time against untaught model 2. Read-out: the new outputs. Practi
 (c) A three times larger body gains about 0.009 on natural variants (one seed). With the extra pieces it gains the same there and a little more on the scan. For scale: the taught model 2 scores 0.584 / 0.699 and MPAC 0.609 on the practice chromosomes, so no single change here closes the gap to MPAC.
 
 (d) EvoAug-style augmentation (deletions, insertions, inversions, rolls, letter swaps, then clean fine-tuning) lowers every measure, more so in the heavier setting: closed, no gain. The model looks limited by capacity, not by overfitting.
+
+(e) The Malinois design trained with our data and recipe is far below our own design. A lower learning rate helps (0.472 to 0.521), and fold 9 was still rising at the last epoch in all three runs, so these runs are undertrained; but even the best is 0.05 below a network a quarter of its size. Closed for now: MPAC's strength does not transfer by swapping in its body.
 
 Note: the reference runs' training table has the cap-8 leak-guard flaw (near-copies of practice pieces in training, worth about 0.007 on the taught model's practice score); the extra pieces were filtered with the exact guard.
 
