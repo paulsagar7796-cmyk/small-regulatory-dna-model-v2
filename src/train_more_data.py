@@ -52,6 +52,18 @@ practice chromosomes are not used to pick the checkpoint.
                      data/models/MPAC/config.json; src/malinois_body.py). Our 230-letter rows (after the slide and the strand flip, which act
                      as before) are cut to the middle 200 letters and padded to 600 with the vector flanks MPAC's own predict() uses. The run
                      name gets the suffix _malinois. Optimiser, schedule and --lr/--wd are unchanged (--width is refused with malinois).
+  --max_se X         (default 0 = off) Malinois' piece filter (Gosai and others 2024; boda2 mpra_datamodule: drop a piece when its largest
+                     log2FC standard error over its cell types is 1.0 or more). Here: every NEW-TABLE training piece (one version of a
+                     variant = one row; and every --extra_table piece) is dropped, with all its labels, when the largest standard error
+                     over the new outputs it has a label for (of the trained --new_cells) is >= X. A label whose SE is missing is ignored
+                     in that maximum (never happens in the two tables); a piece with no label at all is kept. lentiMPRA rows have no SE
+                     column and are never touched. Only training rows: fold 9 and the practice tables are unchanged. The label scaling
+                     (mean and std per output) is computed BEFORE the filter, so the output units equal those of earlier runs.
+  --oversample T     (default 0 = off) Malinois duplicates pieces whose largest log2FC is >= 0.5. Here: a new-table (or --extra_table)
+                     training piece that survived --max_se and whose largest raw log2FC over its labelled new outputs is >= T appears
+                     TWICE per epoch. lentiMPRA rows are never duplicated. An epoch is still "every training row once", so the epoch
+                     has more steps (the one-cycle schedule is stretched). Both options: run-name suffixes _se{X} and _os{T} after all
+                     others, only when on; refused with --pair_loss and --evoaug; fine with --teachers and --extra_table.
 Practice data only. The locked chromosomes (5, 14, 22) and lentiMPRA fold 10 are never loaded.
 
 Run from the repository root:
@@ -227,6 +239,26 @@ def evoaug_batch(c: torch.Tensor, n_max: int, hard: bool, sizes: dict, gen: torc
     return out
 
 
+def select_training_rows(y_raw: np.ndarray, se: np.ndarray, first_new: int, n_lenti_out: int, max_se: float, oversample: float):
+    """Which rows train, and how often. y_raw, se: (rows, outputs), raw units, NaN = not measured. Rows before first_new (lentiMPRA)
+    are never filtered or duplicated; only the outputs from n_lenti_out on (the new tables) are looked at.
+    Returns (index list: kept rows once, duplicated rows twice; dropped mask; duplicated mask; per-row largest SE; per-row largest log2FC).
+    A row with no measured new output has no maximum (NaN) and is kept, not duplicated."""
+    n = len(y_raw)
+    new = np.arange(n) >= first_new
+    lab = ~np.isnan(y_raw[:, n_lenti_out:])
+    se_ok = lab & ~np.isnan(se[:, n_lenti_out:])
+    row_se = np.where(se_ok, se[:, n_lenti_out:], -np.inf).max(1)
+    row_lfc = np.where(lab, y_raw[:, n_lenti_out:], -np.inf).max(1)
+    row_se[np.isinf(row_se)] = np.nan
+    row_lfc[np.isinf(row_lfc)] = np.nan
+    with np.errstate(invalid="ignore"):
+        drop = new & (row_se >= max_se) if max_se > 0 else np.zeros(n, bool)
+        dup = new & ~drop & (row_lfc >= oversample) if oversample > 0 else np.zeros(n, bool)
+    idx = np.concatenate([np.arange(n)[~drop], np.arange(n)[dup]])
+    return idx, drop, dup, row_se, row_lfc
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--new_cells", default=",".join(NEW_CELLS))
@@ -253,6 +285,8 @@ def main() -> None:
     ap.add_argument("--evoaug_mut", type=float, default=0.05, help="share of letters changed by the point mutations (paper, DeepSTARR: 0.05)")
     ap.add_argument("--finetune_epochs", type=int, default=0, help="extra epochs without EvoAug after the main schedule")
     ap.add_argument("--finetune_lr", type=float, default=1e-4, help="constant learning rate of the fine-tuning epochs (EvoAug: 1e-4)")
+    ap.add_argument("--max_se", type=float, default=0.0, help="drop new-table pieces whose largest log2FC SE is >= this (0 = off; see the docstring)")
+    ap.add_argument("--oversample", type=float, default=0.0, help="new-table pieces with largest log2FC >= this appear twice per epoch (0 = off)")
     ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only (caps each stage)")
     ap.add_argument("--tag", default="")
     args = ap.parse_args()
@@ -265,6 +299,12 @@ def main() -> None:
         assert new_cells, "--extra_table needs new outputs (the variant table)"
     if args.evoaug and (args.pair_loss > 0 or teacher_paths):
         ap.error("--evoaug cannot be combined with --pair_loss or --teachers (not implemented)")
+    if args.max_se < 0 or args.oversample < 0:
+        ap.error("--max_se and --oversample must be >= 0")
+    if (args.max_se > 0 or args.oversample > 0) and (args.pair_loss > 0 or args.evoaug):
+        ap.error("--max_se / --oversample cannot be combined with --pair_loss or --evoaug (not implemented)")
+    if (args.max_se > 0 or args.oversample > 0) and not new_cells:
+        ap.error("--max_se / --oversample act on the new-table pieces, so they need new outputs")
     if args.arch == "malinois" and args.width != 1.0:
         ap.error("--width only applies to --arch legnet")
     if args.evoaug < 0 or args.evoaug > len(EVOAUG_NAMES) or args.finetune_epochs < 0:
@@ -272,7 +312,8 @@ def main() -> None:
     name = f"more_{'-'.join(new_cells) if new_cells else 'control'}" \
            + (f"_distill_t{len(teacher_paths)}_lam{args.lam}_mut{args.mut}" if teacher_paths else "") \
            + (f"_pair{args.pair_loss}" if args.pair_loss > 0 else "") + f"_e{args.epochs}" + (f"_{args.tag}" if args.tag else "") + f"_seed{args.seed}" + ("_gosai" if args.extra_table else "") + (f"_w{args.width}" if args.width != 1.0 else "") \
-           + (f"_evoaug{args.evoaug}" + ("hard" if args.evoaug_hard else "") if args.evoaug else "") + (f"_ft{args.finetune_epochs}" if args.finetune_epochs else "") + ("_malinois" if args.arch == "malinois" else "")
+           + (f"_evoaug{args.evoaug}" + ("hard" if args.evoaug_hard else "") if args.evoaug else "") + (f"_ft{args.finetune_epochs}" if args.finetune_epochs else "") + ("_malinois" if args.arch == "malinois" else "") \
+           + (f"_se{args.max_se}" if args.max_se > 0 else "") + (f"_os{args.oversample}" if args.oversample > 0 else "")
     run_dir = Path(RUNS) / name
     run_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
@@ -321,6 +362,37 @@ def main() -> None:
                 y_ex[:, len(CELLS) + j] = ex[f"log2FC_{cell}"].to_numpy()
         y_raw = np.concatenate([y_raw, y_ex])
         extra_rows = len(ex)
+    train_idx, selection = None, {}  # None = every row once (the behaviour without --max_se / --oversample)
+    if args.max_se > 0 or args.oversample > 0:  # standard errors, in the row order of y_raw; lentiMPRA rows have none
+        se_raw = np.full(y_raw.shape, np.nan, dtype=np.float32)
+        for a, off in (("allele1", lenti_rows), ("allele2", lenti_rows + n_var)):
+            for j, cell in enumerate(new_cells):
+                se_raw[off : off + n_var, len(CELLS) + j] = nt[f"{a}.log2FC.SE_{cell}"].to_numpy()
+        if args.extra_table:
+            for j, cell in enumerate(new_cells):
+                if f"log2FC.SE_{cell}" in ex.columns:
+                    se_raw[lenti_rows + new_rows :, len(CELLS) + j] = ex[f"log2FC.SE_{cell}"].to_numpy()
+        train_idx, drop, dup, row_se, row_lfc = select_training_rows(y_raw, se_raw, lenti_rows, len(CELLS), args.max_se, args.oversample)
+        lab_new = ~np.isnan(y_raw[:, len(CELLS):])
+        selection = {"label_without_se_ignored": int((lab_new & np.isnan(se_raw[:, len(CELLS):])).sum()),
+                     "rows_without_new_label": int(((np.arange(len(y_raw)) >= lenti_rows) & ~lab_new.any(1)).sum())}
+        for part, lo, hi in (("variant_table", lenti_rows, lenti_rows + new_rows), ("extra_table", lenti_rows + new_rows, len(y_raw))):
+            if hi == lo:
+                continue
+            m = slice(lo, hi)
+            selection[part] = {"pieces_before": hi - lo, "pieces_dropped": int(drop[m].sum()), "pieces_after": int((hi - lo) - drop[m].sum()),
+                               "pieces_duplicated": int(dup[m].sum()),
+                               "per_cell": {cell: {"labelled": int(lab_new[m, j].sum()), "labelled_and_dropped": int((lab_new[m, j] & drop[m]).sum()),
+                                                   "own_se_at_or_above": int((se_raw[m, len(CELLS) + j] >= args.max_se).sum()) if args.max_se > 0 else 0}
+                                            for j, cell in enumerate(new_cells)}}
+        selection.update(max_se=args.max_se, oversample=args.oversample, rows_before=len(y_raw), rows_per_epoch=len(train_idx))
+        for part in ("variant_table", "extra_table"):
+            if part in selection:
+                p_ = selection[part]
+                print(f"{part}: {p_['pieces_before']:,} pieces, dropped {p_['pieces_dropped']:,} (max SE >= {args.max_se}), kept {p_['pieces_after']:,}, "
+                      f"duplicated {p_['pieces_duplicated']:,} (max log2FC >= {args.oversample}); per cell (labelled / labelled and dropped): "
+                      + ", ".join(f"{c} {v['labelled']:,}/{v['labelled_and_dropped']:,}" for c, v in p_["per_cell"].items()), flush=True)
+        train_idx = torch.from_numpy(train_idx)
     x_tr = torch.from_numpy(np.concatenate(x))
     y_tr = torch.from_numpy((y_raw - mean) / std)
     pair_var = None
@@ -359,7 +431,8 @@ def main() -> None:
         return out.float()
 
     model = build_arch(args.arch, n_out, width=args.width).to(device)
-    steps_per_epoch = (len(x_tr) + args.batch - 1) // args.batch
+    epoch_rows = len(x_tr) if train_idx is None else len(train_idx)  # an epoch = every training row once (kept pieces once, duplicated ones twice)
+    steps_per_epoch = (epoch_rows + args.batch - 1) // args.batch
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr / 25, weight_decay=args.wd)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=args.epochs * steps_per_epoch,
                                                 pct_start=0.3, three_phase=False, cycle_momentum=False)
@@ -367,6 +440,8 @@ def main() -> None:
               "lentimpra_rows": lenti_rows, "new_rows": new_rows, "extra_rows": extra_rows, "lentimpra_rows_removed_by_new_guard": int(sum(
                   (everything[c].fold.isin(TRAIN_FOLDS) & everything[c].seq.isin(excluded)).sum() for c in CELLS)),
               "label_mean": mean.tolist(), "label_std": std.tolist()}
+    if selection:
+        config["row_selection"] = {**selection, "steps_per_epoch": steps_per_epoch}
     print(f"{name}: {config['parameters']:,} parameters; {lenti_rows:,} lentiMPRA rows + {new_rows:,} new rows"
           + (f" + {extra_rows:,} extra rows" if args.extra_table else "") + f"; {steps_per_epoch:,} steps per epoch; "
           f"{n_out} outputs; device {device}", flush=True)
@@ -383,7 +458,11 @@ def main() -> None:
                 g["lr"] = args.finetune_lr  # constant; the one-cycle schedule has ended and is not stepped any more
         for _ in range(stage_epochs):
             epoch += 1
-            order, losses, pair_losses = torch.randperm(len(x_tr), generator=gen), [], []
+            if train_idx is None:
+                order = torch.randperm(len(x_tr), generator=gen)
+            else:  # kept rows once, duplicated rows twice, dropped rows never
+                order = train_idx[torch.randperm(len(train_idx), generator=gen)]
+            losses, pair_losses = [], []
             for i in range(0, len(order), args.batch):
                 idx = order[i : i + args.batch]
                 c = x_tr[idx]
