@@ -57,7 +57,7 @@ from mpra_train import RUNS  # noqa: E402
 from mpra_train_multi import predict_multi  # noqa: E402
 from mpra_train_v2 import RIGHT_FLANK, flank_shift  # noqa: E402
 from malinois_body import build_arch  # noqa: E402
-from train_more_data import NEW_CELLS, between_adapters, both_orientations, masked_mse, practice_readout  # noqa: E402
+from train_more_data import NEW_CELLS, between_adapters, both_orientations, masked_mse, practice_readout, shift_by  # noqa: E402
 
 # ---- names of the files and arrays of the other engineer: change here only ----
 FILES = {"train": "train.parquet", "practice": "practice13.parquet", "mutants": "mutants.parquet",
@@ -259,6 +259,9 @@ def main() -> None:
     ap.add_argument("--st2_chrs", default="19,21,X", help="P1/P2: chromosomes on which the teacher's error variance is measured "
                     "('all' = every training row, the first version's behaviour)")
     ap.add_argument("--st2_scale", type=float, default=1.0, help="P1/P2: multiply the teacher's error variance (0.01 = nearly pure teacher target)")
+    ap.add_argument("--teacher_effect", type=float, default=0.0, help="weight of the loss on the TEACHER's effect (version 2 minus 1) over "
+                    "--pair_batch random training variants per step, divided by the teacher-effect variance (0 = off)")
+    ap.add_argument("--pair_batch", type=int, default=256)
     ap.add_argument("--amp", action="store_true", help="CUDA only: fp16 mixed precision for the training forward pass (memory)")
     ap.add_argument("--teacher_unlabelled", action="store_true", help="P1/P2: where the label is missing but the teacher exists, train on the teacher alone")
     ap.add_argument("--skip_align_check", action="store_true", help="do not stop when the teacher mix correlates below 0.3 with the labels")
@@ -366,6 +369,13 @@ def main() -> None:
         w_mut = torch.nan_to_num(w_mut, nan=1.0)
         mstream = MutantStream(2 * n_var, torch.Generator().manual_seed(args.seed + 15485863))
 
+    t_eff = eff_var = None
+    if args.teacher_effect > 0:  # the teacher mix's effect per variant (version 2 minus version 1), standardised units
+        tt = torch.from_numpy(T["t"])
+        t_eff = tt[n_var:] - tt[:n_var]
+        eff_var = torch.from_numpy(np.nanvar(t_eff.numpy(), axis=0)).float()
+        pgen = torch.Generator().manual_seed(args.seed + 104729)
+        print("teacher effect variance per output (standardised units): " + ", ".join(f"{v:.4f}" for v in eff_var), flush=True)
     val = {c: everything[c][everything[c].fold == VALIDATION_FOLD].reset_index(drop=True) for c in CELLS}
     x_val = {c: torch.from_numpy(encode(val[c].seq)) for c in CELLS}
     pr = pd.read_parquet(data_dir / FILES["practice"])
@@ -392,7 +402,7 @@ def main() -> None:
     log, best, t0, step = [], -1.0, time.time(), 0
     for epoch in range(1, args.epochs + 1):
         order = torch.randperm(len(x_tr), generator=gen)
-        losses, l_lab, l_tea, l_mut = [], [], [], []
+        losses, l_lab, l_tea, l_mut, l_eff = [], [], [], [], []
         for i in range(0, len(order), args.batch):
             idx = order[i : i + args.batch]
             c = x_tr[idx]
@@ -405,6 +415,13 @@ def main() -> None:
                 if args.shift:
                     cm = flank_shift(cm, args.shift, flank, mgen)
                 c = torch.cat([c, cm])
+            if t_eff is not None:  # both versions of --pair_batch random variants, same slide, appended last
+                pair_v = torch.randint(0, n_var, (args.pair_batch,), generator=pgen)
+                pc = x_tr[torch.cat([lenti_rows + pair_v, lenti_rows + n_var + pair_v])]
+                if args.shift:
+                    pc = shift_by(pc, torch.randint(0, args.shift + 1, (args.pair_batch, 1), generator=pgen).repeat(2, 1), flank)
+                n_before_pairs = len(c)
+                c = torch.cat([c, pc])
             c = c.to(device)
             if torch.rand(1, generator=gen).item() < 0.5:  # one strand for the whole batch
                 c = reverse_complement_codes(c)
@@ -419,9 +436,18 @@ def main() -> None:
                 l_tea.append(tl.item())
                 loss = loss + tl
             if use_mut:
-                ml = args.mut_weight * weighted_masked_mse(pred[n_main:], t_mut[mi].to(device), w_mut[mi].to(device))
+                ml = args.mut_weight * weighted_masked_mse(pred[n_main : n_main + len(mi)], t_mut[mi].to(device), w_mut[mi].to(device))
                 l_mut.append(ml.item())
                 loss = loss + ml
+            if t_eff is not None:
+                pp = pred[n_before_pairs:][:, T_OUT]
+                dp = pp[args.pair_batch:] - pp[: args.pair_batch]
+                dt = t_eff[pair_v].to(device)
+                ok = ~torch.isnan(dt)
+                per = torch.where(ok, (dp - torch.nan_to_num(dt)) ** 2, torch.zeros_like(dt)).sum(0) / ok.sum(0).clamp(min=1) / eff_var.to(device)
+                et = args.teacher_effect * per.mean()
+                l_eff.append(et.item())
+                loss = loss + et
             opt.zero_grad()
             scaler.scale(loss).backward()
             scaler.unscale_(opt)
@@ -440,6 +466,8 @@ def main() -> None:
             entry["teacher_loss"] = float(np.mean(l_tea))
         if l_mut:
             entry["mutant_loss"] = float(np.mean(l_mut))
+        if l_eff:
+            entry["teacher_effect_loss"] = float(np.mean(l_eff))
         pv = practice_readout(both_orientations(model, pr.seq1, device), both_orientations(model, pr.seq2, device), pr, readout)
         entry["practice13"] = pv
         entry["practice13_mean_effect"] = float(np.mean([v["effect"] for v in pv.values()]))
