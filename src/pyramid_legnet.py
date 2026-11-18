@@ -1,10 +1,11 @@
 """PyramidLegNet: the MPRA-LegNet body with three optional changes, each switchable so they can be screened one at a time.
 
-    1. multi-scale stem   three parallel convolutions (kernels 5, 9, 15) -> concatenate -> BatchNorm -> SiLU -> squeeze-excitation
-                          (LegNet: one convolution, kernel 11 -> BatchNorm -> SiLU)
-    2. feature pyramid    the readout sees blocks 2, 3 and 4 (each taken BEFORE its max-pool, i.e. at 115, 57 and 28 positions),
-                          each projected to a common width by BatchNorm + 1x1 convolution and averaged over positions, then
-                          concatenated (LegNet: only the final 14-position map, through one 1x1 "mapper", averaged)
+    1. multi-scale stem   three parallel convolutions (kernels 5, 9, 15; 24 + 24 + 16 = 64 channels, LegNet's stem width, so the
+                          trunk after the stem is unchanged) -> concatenate -> BatchNorm -> SiLU -> squeeze-excitation
+                          (LegNet: one convolution, kernel 11, 64 channels -> BatchNorm -> SiLU)
+    2. feature pyramid    LegNet's own readout (final 14-position map -> 1x1 "mapper" -> average) is KEPT, and blocks 2 and 3
+                          are added, each taken BEFORE its max-pool (115 and 57 positions), projected to a common width by
+                          BatchNorm + 1x1 convolution and averaged; all concatenated. A strict superset of LegNet's readout.
     3. assay adapters     after the shared readout layer, one small residual bottleneck per assay family (lentiMPRA outputs,
                           plasmid outputs), each followed by its own final linear layer
                           (LegNet: one final linear layer for all outputs)
@@ -160,14 +161,15 @@ class PyramidLegNet(nn.Module):
 
     n_out        number of outputs; n_lenti of them (the first ones) are lentiMPRA, the rest plasmid
     width        channel multiplier for every LegNet layer (1.0 = published sizes), as --width in our trainers
-    taps         which blocks feed the pyramid (0-based; (1, 2, 3) = blocks 2, 3, 4), each taken before its max-pool
+    taps         which blocks feed the pyramid (0-based; (1, 2) = blocks 2 and 3), each taken before its max-pool
+    keep_final   with the pyramid on, also keep LegNet's own readout path (final map -> mapper), so the readout is a superset
     tap_ch       width of each tap after projection; pool_stats 'mean' (as LegNet) or 'meanstd' (mean and standard deviation)
     adapter_dim  bottleneck width of each adapter
     """
 
     def __init__(self, n_out: int, n_lenti: int = 3, width: float = 1.0, multiscale_stem: bool = True, pyramid: bool = True,
-                 adapters: bool = True, stem_kernels=(5, 9, 15), stem_branch_ch: int = 32, taps=(1, 2, 3), tap_ch: int = 128,
-                 pool_stats: str = "mean", adapter_dim: int = 64):
+                 adapters: bool = True, stem_kernels=(5, 9, 15), stem_branch_ch=(24, 24, 16), taps=(1, 2), keep_final: bool = True,
+                 tap_ch: int = 128, pool_stats: str = "mean", adapter_dim: int = 64):
         super().__init__()
         assert 0 < n_lenti <= n_out and pool_stats in ("mean", "meanstd")
         w = (lambda c: c) if width == 1.0 else (lambda c: int(round(c * width / 8)) * 8)
@@ -177,8 +179,10 @@ class PyramidLegNet(nn.Module):
 
         # stem
         if multiscale_stem:
-            self.stem = MultiScaleStem(4, [w(stem_branch_ch)] * len(stem_kernels), stem_kernels)
-            in_ch = w(stem_branch_ch) * len(stem_kernels)
+            branch = [w(c) for c in stem_branch_ch]
+            assert len(branch) == len(stem_kernels)
+            self.stem = MultiScaleStem(4, branch, stem_kernels)
+            in_ch = sum(branch)
         else:
             self.stem = LocalBlock(4, LEGNET_STEM_KS, nn.SiLU, out_ch=w(LEGNET_STEM_CH))
             in_ch = w(LEGNET_STEM_CH)
@@ -195,8 +199,11 @@ class PyramidLegNet(nn.Module):
         k = 2 if pool_stats == "meanstd" else 1
         if pyramid:
             self.taps = tuple(taps)
+            self.keep_final = keep_final
             self.proj = nn.ModuleList([MapperBlock(blocks[i], w(tap_ch)) for i in self.taps])
-            readout_in = len(self.taps) * w(tap_ch) * k
+            if keep_final:
+                self.mapper = MapperBlock(blocks[-1], head_dim)
+            readout_in = ((head_dim if keep_final else 0) + len(self.taps) * w(tap_ch)) * k
         else:
             self.taps = None
             self.mapper = MapperBlock(blocks[-1], head_dim)
@@ -228,9 +235,12 @@ class PyramidLegNet(nn.Module):
         for i, st in enumerate(self.stages):
             x = st.body(x)
             if self.taps is not None and i in self.taps:
-                tapped.append(x)  # before the max-pool: 115, 57, 28 positions for blocks 2, 3, 4 at 230 letters
+                tapped.append(x)  # before the max-pool: 115 and 57 positions for blocks 2 and 3 at 230 letters
             x = st.pool(x)
-        feats = [self.mapper(x)] if self.taps is None else [p(t) for p, t in zip(self.proj, tapped)]
+        if self.taps is None:
+            feats = [self.mapper(x)]
+        else:
+            feats = ([self.mapper(x)] if self.keep_final else []) + [p(t) for p, t in zip(self.proj, tapped)]
         h = self.head_shared(torch.cat([self._pool(f) for f in feats], dim=1))
         if self.adapters is None:
             return self.out(h)

@@ -46,6 +46,9 @@ def test_off_equals_legnet():
     assert a.shape == b.shape == (32, 8)
     assert torch.equal(a, b), (a - b).abs().max()
     print("ok  all changes off == LegNet: 1,324,264 parameters, identical outputs with LegNet's weights")
+    full = build_pyramid("pyramid", 8)
+    assert sum(p.numel() for p in full.stages.parameters()) == sum(p.numel() for p in leg.main.parameters()) == 1_219_680
+    print("ok  the full preset keeps LegNet's trunk unchanged (1,219,680 parameters in the four blocks)")
 
 
 def test_presets_forward_backward():
