@@ -259,6 +259,7 @@ def main() -> None:
     ap.add_argument("--st2_chrs", default="19,21,X", help="P1/P2: chromosomes on which the teacher's error variance is measured "
                     "('all' = every training row, the first version's behaviour)")
     ap.add_argument("--st2_scale", type=float, default=1.0, help="P1/P2: multiply the teacher's error variance (0.01 = nearly pure teacher target)")
+    ap.add_argument("--amp", action="store_true", help="CUDA only: fp16 mixed precision for the training forward pass (memory)")
     ap.add_argument("--teacher_unlabelled", action="store_true", help="P1/P2: where the label is missing but the teacher exists, train on the teacher alone")
     ap.add_argument("--skip_align_check", action="store_true", help="do not stop when the teacher mix correlates below 0.3 with the labels")
     ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only")
@@ -386,6 +387,8 @@ def main() -> None:
           + f"; {steps_per_epoch:,} steps per epoch; device {device}", flush=True)
     gen = torch.Generator().manual_seed(args.seed)
     mgen = torch.Generator().manual_seed(args.seed + 32452843)  # slides of the mutated copies
+    use_amp = bool(args.amp) and device.type == "cuda"  # fp16 autocast + loss scaling, to fit the 4M body with the mutated stream on a 16 GB T4
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     log, best, t0, step = [], -1.0, time.time(), 0
     for epoch in range(1, args.epochs + 1):
         order = torch.randperm(len(x_tr), generator=gen)
@@ -405,7 +408,9 @@ def main() -> None:
             c = c.to(device)
             if torch.rand(1, generator=gen).item() < 0.5:  # one strand for the whole batch
                 c = reverse_complement_codes(c)
-            pred = model(onehot(c))
+            with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=use_amp):
+                pred = model(onehot(c))
+            pred = pred.float()
             pm = pred[:n_main]
             loss = masked_mse(pm, tgt_tr[idx].to(device))
             l_lab.append(loss.item())
@@ -418,9 +423,11 @@ def main() -> None:
                 l_mut.append(ml.item())
                 loss = loss + ml
             opt.zero_grad()
-            loss.backward()
+            scaler.scale(loss).backward()
+            scaler.unscale_(opt)
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            opt.step()
+            scaler.step(opt)
+            scaler.update()
             sched.step()
             losses.append(loss.item())
             step += 1
