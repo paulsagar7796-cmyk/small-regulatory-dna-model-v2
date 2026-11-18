@@ -250,6 +250,8 @@ def main() -> None:
     ap.add_argument("--wd", type=float, default=0.1)
     ap.add_argument("--shift", type=int, default=21)
     ap.add_argument("--width", type=float, default=1.0)
+    ap.add_argument("--arch", default="legnet", choices=["legnet", "pyramid", "pyr_stem", "pyr_taps", "pyr_taps_ms", "pyr_adapt"],
+                    help="student design: legnet (models 1 and 2) or a PyramidLegNet preset (src/pyramid_legnet.py)")
     ap.add_argument("--w_ag", type=float, default=3.0, help="weight of AlphaGenome in the teacher mix")
     ap.add_argument("--w_mpac", type=float, default=1.0, help="weight of MPAC in the teacher mix")
     ap.add_argument("--lam", type=float, default=1.0, help="P0: weight of the teacher term against the label term")
@@ -274,7 +276,7 @@ def main() -> None:
     mut_batch = args.mut_batch or args.batch
     data_dir = Path(args.data_dir)
     files = {"dir": data_dir}
-    name = f"m3_{args.mode}_e{args.epochs}_seed{args.seed}" + (f"_w{args.width}" if args.width != 1.0 else "") + (f"_{args.tag}" if args.tag else "")
+    name = f"m3_{args.mode}_e{args.epochs}_seed{args.seed}" + (f"_w{args.width}" if args.width != 1.0 else "") + (f"_{args.arch}" if args.arch != "legnet" else "") + (f"_{args.tag}" if args.tag else "")
     run_dir = Path(RUNS) / name
     run_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
@@ -382,7 +384,7 @@ def main() -> None:
     readout = {f"new_{cell}": (cell, len(CELLS) + NEW_CELLS.index(cell)) for cell in ("HEPG2", "K562")}
     flank = torch.from_numpy(encode(pd.Series([RIGHT_FLANK]))[0])
 
-    model = build_arch("legnet", n_out, width=args.width).to(device)
+    model = build_arch(args.arch, n_out, width=args.width).to(device)
     steps_per_epoch = (total_rows + args.batch - 1) // args.batch
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr / 25, weight_decay=args.wd)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=args.epochs * steps_per_epoch,

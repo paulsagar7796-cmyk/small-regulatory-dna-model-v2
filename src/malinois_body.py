@@ -61,5 +61,8 @@ def build_arch(arch: str, n_out: int, width: float = 1.0) -> nn.Module:
     if arch == "malinois":
         assert width == 1.0, "--width only applies to the legnet body"
         return MalinoisBody(n_out)
+    if arch.startswith("pyr"):  # src/pyramid_legnet.py: LegNet + multi-scale stem / feature pyramid / assay adapters
+        from pyramid_legnet import build_pyramid
+        return build_pyramid(arch, n_out, width=width)
     from mpra_train_v2 import build  # imported here: mpra_train_v2 needs data helpers this module does not
     return build(arch, n_out, width=width)
