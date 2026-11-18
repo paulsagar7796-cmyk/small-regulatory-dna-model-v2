@@ -18,7 +18,9 @@ Teacher target (units of the standardised label of that output; everything below
     mix     (w_ag * z_ag + w_mpac * z_mpac) / (w_ag + w_mpac)             (--w_ag 3 --w_mpac 1)
     t       a + b * mix, with (a, b) = least-squares fit of the standardised label on mix over rows with a measured label
     sy2     squared standard error of the label / std(output)^2           (columns allele{1,2}.log2FC.SE_<CELL>)
-    st2     var(label - t) - mean(sy2) over measured rows, floored at 0.01 (the teacher's own error variance)
+    st2     var(label - t) - mean(sy2) over measured rows of the --st2_chrs chromosomes (default 19, 21, X: AlphaGenome-FT's
+            validation chromosomes, which it never fitted; on the chromosomes it trained on, its residual is about 2.5x smaller,
+            so the teacher would look nearly error-free), floored at 0.01 (the teacher's own error variance)
 
 Modes (loss on a batch; label loss = masked_mse as in model 2: mean per output over its measured rows, then over outputs)
     P0   masked_mse(pred, label) + lam * masked_mse(pred, t restricted to rows whose label is measured)
@@ -95,12 +97,15 @@ def calibrate(y: np.ndarray, m: np.ndarray):
     return a, b
 
 
-def teacher_error_variance(y: np.ndarray, t: np.ndarray, sy2: np.ndarray):
+def teacher_error_variance(y: np.ndarray, t: np.ndarray, sy2: np.ndarray, rows: np.ndarray | None = None):
     """Per-column variance of (label - teacher) over rows where both exist, minus the mean label error variance sy2 over the same rows
-    (a missing sy2 is skipped in that mean), floored at ST2_FLOOR. Returns (floored, unfloored)."""
+    (a missing sy2 is skipped in that mean), floored at ST2_FLOOR. rows: optional boolean mask of the rows to use.
+    Returns (floored, unfloored)."""
     raw = np.zeros(y.shape[1])
     for k in range(y.shape[1]):
         ok = ~np.isnan(y[:, k]) & ~np.isnan(t[:, k])
+        if rows is not None:
+            ok &= rows
         raw[k] = np.var((y[ok, k] - t[ok, k]).astype(np.float64)) - np.nanmean(sy2[ok, k].astype(np.float64))
     return np.maximum(raw, ST2_FLOOR), raw
 
@@ -166,7 +171,7 @@ def has_teacher(files: dict, which: str) -> bool:
     return pattern.format(cell=TEACHER_CELL_NAMES[T_CELLS[0]], v=1) in np.load(p).files
 
 
-def build_teacher_targets(mode: str, y_n: np.ndarray, sy_n: np.ndarray, tr: dict, mu: dict, args) -> dict:
+def build_teacher_targets(mode: str, y_n: np.ndarray, sy_n: np.ndarray, tr: dict, mu: dict, args, st2_rows=None) -> dict:
     """y_n, sy_n: (2n, 3) standardised labels and standard errors (NaN = missing) of the variant rows. tr: training teachers
     {'ag': (2n,3), 'mpac': (2n,3)}; mu: the mutated copies' teachers (same keys) or None.
     Returns the arrays the training loop uses and a dict of numbers for the log."""
@@ -178,11 +183,11 @@ def build_teacher_targets(mode: str, y_n: np.ndarray, sy_n: np.ndarray, tr: dict
     t = (a + b * m).astype(np.float32)
     sy2 = np.maximum(sy_n.astype(np.float64) ** 2, SY2_FLOOR)
     sy2 = np.where(np.isnan(sy_n) & ~np.isnan(y_n), np.nanmean(np.where(np.isnan(y_n), np.nan, sy2), axis=0), sy2)  # a label without SE: mean SE
-    st2, st2_raw = teacher_error_variance(y_n, t, sy2)
+    st2, st2_raw = teacher_error_variance(y_n, t, sy2, st2_rows)
     d = disagreement(zA, zM)
     info = {"zscore_mean": {k: v[0].tolist() for k, v in zp.items()}, "zscore_std": {k: v[1].tolist() for k, v in zp.items()},
             "w_ag": args.w_ag, "w_mpac": args.w_mpac, "calibration_intercept": a.tolist(), "calibration_slope": b.tolist(),
-            "st2": st2.tolist(), "st2_before_floor": st2_raw.tolist(), "mean_sy2": np.nanmean(np.where(np.isnan(y_n), np.nan, sy2), axis=0).tolist(),
+            "st2_rows": None if st2_rows is None else int(st2_rows.sum()), "st2": st2.tolist(), "st2_before_floor": st2_raw.tolist(), "mean_sy2": np.nanmean(np.where(np.isnan(y_n), np.nan, sy2), axis=0).tolist(),
             "labelled_rows": (~np.isnan(y_n)).sum(0).tolist(), "teacher_missing_rows": np.isnan(t).sum(0).tolist(),
             "pearson_mix_label": [float(np.corrcoef(m[ok, k], y_n[ok, k])[0, 1]) for k in range(len(T_CELLS))
                                   for ok in [~np.isnan(m[:, k]) & ~np.isnan(y_n[:, k])]],
@@ -250,6 +255,8 @@ def main() -> None:
     ap.add_argument("--mut_weight", type=float, default=None, help="weight of the mutated-copy loss (default 1.0 for P1 and P2, 0 for P0; 0 = no stream)")
     ap.add_argument("--mut_batch", type=int, default=0, help="mutated rows per step (default = --batch)")
     ap.add_argument("--gate_k", type=float, default=3.0, help="P2: gate threshold in combined standard deviations")
+    ap.add_argument("--st2_chrs", default="19,21,X", help="P1/P2: chromosomes on which the teacher's error variance is measured "
+                    "('all' = every training row, the first version's behaviour)")
     ap.add_argument("--teacher_unlabelled", action="store_true", help="P1/P2: where the label is missing but the teacher exists, train on the teacher alone")
     ap.add_argument("--skip_align_check", action="store_true", help="do not stop when the teacher mix correlates below 0.3 with the labels")
     ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only")
@@ -322,7 +329,11 @@ def main() -> None:
         else:
             print("WARNING: no MPAC labels for the mutated copies; their teacher is AlphaGenome alone (disagreement 0)", flush=True)
             mu["mpac"] = mu["ag"]
-    T = build_teacher_targets(args.mode, y_n, sy_n, tr, mu, args)
+    st2_rows = None
+    if args.st2_chrs != "all":
+        st2_rows = np.tile(nt.chr.astype(str).isin(args.st2_chrs.split(",")).to_numpy(), 2)
+        assert st2_rows.sum() > 1000, f"only {st2_rows.sum()} rows on --st2_chrs {args.st2_chrs}"
+    T = build_teacher_targets(args.mode, y_n, sy_n, tr, mu, args, st2_rows)
     info = T["info"]
     for k, cell in enumerate(T_CELLS):
         print(f"teacher mix vs label, {cell}: Pearson {info['pearson_mix_label'][k]:.3f}, calibration a {info['calibration_intercept'][k]:.3f} b {info['calibration_slope'][k]:.3f}, "
