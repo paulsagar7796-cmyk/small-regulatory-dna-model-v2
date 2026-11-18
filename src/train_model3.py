@@ -197,6 +197,7 @@ def build_teacher_targets(mode: str, y_n: np.ndarray, sy_n: np.ndarray, tr: dict
         out["t_labelled"] = np.where(np.isnan(y_n), np.nan, t).astype(np.float32)  # the teacher term only on labelled rows
     else:
         st2_row = st2[None, :] * (1 + d ** 2) if mode == "P2" else np.broadcast_to(st2[None, :], y_n.shape)
+        st2_row = st2_row * getattr(args, "st2_scale", 1.0)  # < 1 trusts the teacher more (0.01: the target is almost the teacher alone)
         gk = args.gate_k if mode == "P2" else 0.0
         out["target"] = make_target(y_n, t, sy2, st2_row, gk, args.teacher_unlabelled)
         if gk > 0:
@@ -257,6 +258,7 @@ def main() -> None:
     ap.add_argument("--gate_k", type=float, default=3.0, help="P2: gate threshold in combined standard deviations")
     ap.add_argument("--st2_chrs", default="19,21,X", help="P1/P2: chromosomes on which the teacher's error variance is measured "
                     "('all' = every training row, the first version's behaviour)")
+    ap.add_argument("--st2_scale", type=float, default=1.0, help="P1/P2: multiply the teacher's error variance (0.01 = nearly pure teacher target)")
     ap.add_argument("--teacher_unlabelled", action="store_true", help="P1/P2: where the label is missing but the teacher exists, train on the teacher alone")
     ap.add_argument("--skip_align_check", action="store_true", help="do not stop when the teacher mix correlates below 0.3 with the labels")
     ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only")
