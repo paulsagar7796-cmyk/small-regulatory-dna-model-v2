@@ -1,0 +1,45 @@
+{
+ "read_out": "plasmid outputs (m2_new)",
+ "pieces": 58,
+ "backgrounds": 184,
+ "n_boot": 2000,
+ "score": {
+  "P1": 0.7226,
+  "4M_s1": 0.7349,
+  "4M_s2": 0.7417,
+  "4M_mean": 0.7383,
+  "pyramid": 0.7263
+ },
+ "minus_P1": {
+  "4M_s1": {
+   "diff": 0.0123,
+   "ci95": [
+    0.0051,
+    0.02
+   ]
+  },
+  "4M_s2": {
+   "diff": 0.0191,
+   "ci95": [
+    0.0097,
+    0.0305
+   ]
+  },
+  "4M_mean": {
+   "diff": 0.0157,
+   "ci95": [
+    0.0083,
+    0.0248
+   ]
+  },
+  "pyramid": {
+   "diff": 0.0037,
+   "ci95": [
+    -0.0049,
+    0.0146
+   ]
+  }
+ },
+ "method": "mean Pearson over scan backgrounds per cell type (HepG2, K562), averaged; paired bootstrap over the 58 pieces (both alleles and cell types kept together), seed and draws as src/evaluate_scan.py",
+ "note": "Scored by src/evaluate_practice.py (files scancheck_<run>*.json/.parquet). Their block 'natural_variants_practice_chromosomes' (chromosomes 6, 13, 20) is NOT valid for model 3: chromosomes 6 and 20 are model-3 training data. Use chr13 (model3_pilots_chr13.json) and this scan check only. The scan's practice half includes 20 of 184 backgrounds on chromosome 7: scan pieces, not the locked natural-variant table (scan neighbours were removed from every part of the model-3 split). Teachers AlphaGenome-FT and MPAC were trained on data that include unchanged versions of most scan pieces, so comparisons with model 2 may favour model 3; comparisons among model-3 students are not affected."
+}
