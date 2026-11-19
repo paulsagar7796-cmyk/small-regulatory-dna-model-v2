@@ -1,0 +1,18 @@
+[mem] start          t      0s  live  0.000 GB  driver  0.000 GB  footprint  0.185 GB
+teacher mix vs label, HEPG2: Pearson 0.954, calibration a 0.002 b 0.973, st2 0.090 (before floor 0.090)
+teacher mix vs label, K562: Pearson 0.953, calibration a -0.000 b 0.969, st2 0.066 (before floor 0.066)
+teacher mix vs label, SKNSH: Pearson 0.945, calibration a 0.002 b 0.962, st2 0.054 (before floor 0.054)
+m3_P1_e8_seed20261113_pyramid_memprobeB: 1,484,888 parameters; 279,430 lentiMPRA rows + 455,656 variant rows + 455,656 mutated rows (1024 per step, weight 1.0); 718 steps per epoch; device mps
+[mem] step 1         t      8s  live  0.012 GB  driver 14.661 GB  footprint 16.000 GB
+[mem] step 2         t     10s  live  0.023 GB  driver 14.677 GB  footprint 16.000 GB
+[mem] step 5         t     16s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] step 10        t     27s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] step 21        t     49s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] eval 1         t     90s  live  0.023 GB  driver 14.084 GB  footprint 16.000 GB
+  epoch  1: loss 1.6050 (label 0.9015, mutants 0.7035), fold 9 HepG2 0.198, K562 0.208, WTC11 -0.194, mean 0.071; chr13 effect 0.003 activity 0.095, 1.4 min
+[mem] step 42        t    132s  live  0.023 GB  driver 16.686 GB  footprint 18.000 GB
+[mem] eval 2         t    174s  live  0.023 GB  driver 16.084 GB  footprint 18.000 GB
+  epoch  2: loss 1.4388 (label 0.8231, mutants 0.6157), fold 9 HepG2 0.261, K562 0.250, WTC11 -0.189, mean 0.107; chr13 effect -0.018 activity -0.127, 2.8 min
+[mem] step 63        t    214s  live  0.023 GB  driver 18.686 GB  footprint 20.000 GB
+[mem] eval 3         t    259s  live  0.023 GB  driver 18.084 GB  footprint 20.000 GB
+  epoch  3: loss 1.3566 (label 0.7906, mutants 0.5661), fold 9 HepG2 0.315, K562 0.410, WTC11 0.271, mean 0.332; chr13 effect 0.234 activity 0.263, 4.2 min

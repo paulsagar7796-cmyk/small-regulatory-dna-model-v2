@@ -34,14 +34,22 @@ Modes (loss on a batch; label loss = masked_mse as in model 2: mean per output o
          of that row and output is multiplied by 1 / (1 + d^2).
 The checkpoint rule is unchanged: best mean Pearson on lentiMPRA fold 9.
 
+Mac GPU (MPS) memory: one training step of 2,048 rows caches about 14.7 GB of GPU buffers (flat from step 1). PyTorch keeps freed
+buffers cached and only tries to release them above 1.4 x the recommended working set (35 GB on a 32 GB laptop), so buffers of other
+sizes (each epoch's evaluation, the short last batch) were added on top until the laptop swapped (the PyramidLegNet run of 2026-11-19
+reached 26 GB and stalled after epoch 22). Fix: torch.mps.empty_cache() after each epoch-end evaluation. Also launch laptop runs with
+PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.8 (a hard 20 GB limit: an out-of-memory error instead of a frozen machine; resume with --resume_from).
+
     .venv/bin/python src/train_model3.py --mode P0
     .venv/bin/python src/train_model3.py --mode P2 --seed 2 --width 1.75
 """
 
 import argparse
 import json
+import shutil
 import sys
 import time
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -269,6 +277,12 @@ def main() -> None:
     ap.add_argument("--skip_align_check", action="store_true", help="do not stop when the teacher mix correlates below 0.3 with the labels")
     ap.add_argument("--max_steps", type=int, default=0, help="for a quick test only")
     ap.add_argument("--tag", default="")
+    ap.add_argument("--resume_from", default="", help="run folder of an INTERRUPTED run with the same settings: continue after its last "
+                    "logged epoch (its best.pt must hold that epoch's weights). The earlier epochs' random draws are replayed without "
+                    "computation, so the remaining epochs see the batches the interrupted run would have seen, and the learning-rate "
+                    "schedule continues where it stopped. AdamW's running averages (not in best.pt) are rebuilt on the last "
+                    "--resume_warmup batches of that epoch at learning rate 0 (weights unchanged). Writes to <name>_resume<epoch>.")
+    ap.add_argument("--resume_warmup", type=int, default=200)
     args = ap.parse_args()
     if args.mut_weight is None:
         args.mut_weight = 0.0 if args.mode == "P0" else 1.0
@@ -276,7 +290,19 @@ def main() -> None:
     mut_batch = args.mut_batch or args.batch
     data_dir = Path(args.data_dir)
     files = {"dir": data_dir}
+    resume = None
+    if args.resume_from:
+        assert not args.max_steps, "--resume_from and --max_steps do not mix"
+        old = json.loads((Path(args.resume_from) / "log.json").read_text())
+        last = old["log"][-1]["epoch"]
+        assert [e["epoch"] for e in old["log"]] == list(range(1, last + 1)) and last < args.epochs, "the old log is not epochs 1..k of this run"
+        assert max(old["log"], key=lambda e: e["mean"])["epoch"] == last, \
+            "best.pt holds an earlier epoch than the last logged one (the checkpoint keeps the best fold-9 epoch), so the run cannot be continued exactly"
+        resume = {"config": old["config"], "log": old["log"], "epoch": last, "best": max(e["mean"] for e in old["log"])}
     name = f"m3_{args.mode}_e{args.epochs}_seed{args.seed}" + (f"_w{args.width}" if args.width != 1.0 else "") + (f"_{args.arch}" if args.arch != "legnet" else "") + (f"_{args.tag}" if args.tag else "")
+    if resume:
+        assert name == resume["config"]["name"], f"settings differ from the interrupted run ({resume['config']['name']})"
+        name += f"_resume{resume['epoch']}"
     run_dir = Path(RUNS) / name
     run_dir.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
@@ -394,6 +420,14 @@ def main() -> None:
               "lentimpra_rows_removed_by_guard": int(sum((everything[c].fold.isin(TRAIN_FOLDS) & everything[c].seq.isin(excluded)).sum() for c in CELLS)),
               "label_mean": mean.tolist(), "label_std": std.tolist(), "teacher_output_indices": T_OUT, "teacher": info,
               "mut_batch": mut_batch, "name": name}
+    if resume:  # every setting and every number derived from the data must match the interrupted run
+        now = json.loads(json.dumps(config))
+        diff = sorted(k for k in set(now) | set(resume["config"])
+                      if k not in ("name", "resume_from", "resume_warmup") and now.get(k) != resume["config"].get(k))
+        assert not diff, f"settings or data differ from the interrupted run: {diff}"
+        model.load_state_dict(torch.load(Path(args.resume_from) / "best.pt", map_location=device, weights_only=True))
+        config["resumed_from"] = {"run": resume["config"]["name"], "after_epoch": resume["epoch"], "warmup_steps": args.resume_warmup}
+        warnings.filterwarnings("ignore", message="Detected call of `lr_scheduler.step\\(\\)` before `optimizer.step\\(\\)`")
     print(f"{name}: {config['parameters']:,} parameters; {lenti_rows:,} lentiMPRA rows + {2 * n_var:,} variant rows"
           + (f" + {2 * n_var:,} mutated rows ({mut_batch} per step, weight {args.mut_weight})" if use_mut else "")
           + f"; {steps_per_epoch:,} steps per epoch; device {device}", flush=True)
@@ -402,10 +436,11 @@ def main() -> None:
     use_amp = bool(args.amp) and device.type == "cuda"  # fp16 autocast + loss scaling, to fit the 4M body with the mutated stream on a 16 GB T4
     scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     log, best, t0, step = [], -1.0, time.time(), 0
+    done = resume["epoch"] if resume else 0  # epochs already trained by the interrupted run
     for epoch in range(1, args.epochs + 1):
         order = torch.randperm(len(x_tr), generator=gen)
         losses, l_lab, l_tea, l_mut, l_eff = [], [], [], [], []
-        for i in range(0, len(order), args.batch):
+        for b, i in enumerate(range(0, len(order), args.batch)):
             idx = order[i : i + args.batch]
             c = x_tr[idx]
             if args.shift:
@@ -424,6 +459,14 @@ def main() -> None:
                     pc = shift_by(pc, torch.randint(0, args.shift + 1, (args.pair_batch, 1), generator=pgen).repeat(2, 1), flank)
                 n_before_pairs = len(c)
                 c = torch.cat([c, pc])
+            if epoch <= done:  # resuming: the interrupted run's random draws, in its order
+                if epoch < done or steps_per_epoch - b > args.resume_warmup:
+                    torch.rand(1, generator=gen)  # the strand draw below
+                    sched.step()
+                    step += 1
+                    continue
+                for g in opt.param_groups:  # its last --resume_warmup batches: AdamW's running averages at learning rate 0
+                    g["lr"] = 0.0  # (sched.step() below sets the scheduled rate again; OneCycleLR does not read it back)
             c = c.to(device)
             if torch.rand(1, generator=gen).item() < 0.5:  # one strand for the whole batch
                 c = reverse_complement_codes(c)
@@ -461,6 +504,22 @@ def main() -> None:
             step += 1
             if args.max_steps and step >= args.max_steps:
                 break
+        if epoch <= done:
+            if epoch == done:
+                ck = torch.load(Path(args.resume_from) / "best.pt", map_location=device, weights_only=True)
+                moved = [k for k, p in model.named_parameters() if not torch.equal(p.detach(), ck[k])]
+                assert not moved, f"weights changed during the zero-learning-rate warm-up: {moved[:3]}"
+                model.load_state_dict(ck)  # BatchNorm statistics back to the checkpoint's
+                again = float(np.mean([element_pearson(val[c], predict_multi(model, x_val[c], device)[:, k]) for k, c in enumerate(CELLS)]))
+                assert abs(again - resume["log"][-1]["mean"]) < 2e-3, f"best.pt gives fold-9 mean {again:.4f}, the log says {resume['log'][-1]['mean']:.4f}"
+                log, best = list(resume["log"]), resume["best"]
+                shutil.copy(Path(args.resume_from) / "best.pt", run_dir / "best.pt")
+                print(f"resumed after epoch {done}: {done * steps_per_epoch:,} steps of random draws replayed, AdamW's averages rebuilt over "
+                      f"the last {min(args.resume_warmup, steps_per_epoch)} batches at learning rate 0 (weights unchanged); "
+                      f"learning rate now {opt.param_groups[0]['lr']:.3e}; checkpoint re-scored on fold 9: {again:.4f} (log {best:.4f})", flush=True)
+                if device.type == "mps":
+                    torch.mps.empty_cache()
+            continue
         r = {c: element_pearson(val[c], predict_multi(model, x_val[c], device)[:, k]) for k, c in enumerate(CELLS)}
         mean_r = float(np.mean(list(r.values())))
         entry = {"epoch": epoch, "train_loss": float(np.mean(losses)), "label_loss": float(np.mean(l_lab)), "validation_element_pearson": r, "mean": mean_r}
@@ -474,6 +533,8 @@ def main() -> None:
         entry["practice13"] = pv
         entry["practice13_mean_effect"] = float(np.mean([v["effect"] for v in pv.values()]))
         entry["practice13_mean_activity"] = float(np.mean([v["activity"] for v in pv.values()]))
+        if device.type == "mps":  # Mac GPU: hand back the buffers cached by this evaluation and the short last batch (see the docstring)
+            torch.mps.empty_cache()
         entry["minutes"] = (time.time() - t0) / 60
         log.append(entry)
         print(f"  epoch {epoch:>2}: loss {entry['train_loss']:.4f} (label {entry['label_loss']:.4f}"

@@ -1,0 +1,16 @@
+[mem] start          t      0s  live  0.000 GB  driver  0.000 GB  footprint  0.185 GB
+teacher mix vs label, HEPG2: Pearson 0.954, calibration a 0.002 b 0.973, st2 0.090 (before floor 0.090)
+teacher mix vs label, K562: Pearson 0.953, calibration a -0.000 b 0.969, st2 0.066 (before floor 0.066)
+teacher mix vs label, SKNSH: Pearson 0.945, calibration a 0.002 b 0.962, st2 0.054 (before floor 0.054)
+m3_P1_e25_seed20261113_pyramid_memprobe: 1,484,888 parameters; 279,430 lentiMPRA rows + 455,656 variant rows + 455,656 mutated rows (1024 per step, weight 1.0); 718 steps per epoch; device mps
+[mem] step 1         t      8s  live  0.012 GB  driver 13.661 GB  footprint 15.000 GB
+[mem] step 2         t     10s  live  0.023 GB  driver 14.677 GB  footprint 16.000 GB
+[mem] step 5         t     17s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] step 10        t     27s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] step 25        t     59s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] step 50        t    111s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] step 75        t    163s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] step 100       t    215s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] step 125       t    267s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] step 150       t    318s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
+[mem] step 175       t    370s  live  0.023 GB  driver 14.684 GB  footprint 16.000 GB
