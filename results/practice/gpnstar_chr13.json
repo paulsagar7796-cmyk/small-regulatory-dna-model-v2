@@ -1,0 +1,105 @@
+{
+ "placed_uniquely": 7680,
+ "with_gpnstar_score": 7680,
+ "active_with_score": {
+  "HepG2": 1366,
+  "K562": 1504
+ },
+ "gpnstar_alone": {
+  "signed_pearson": 0.0428,
+  "size_pearson_abs_vs_abs": -0.0016
+ },
+ "P1": {
+  "student": 0.6302,
+  "C1": {
+   "cross_validated": 0.6257,
+   "minus_student": -0.0044,
+   "ci95": [
+    -0.0081,
+    -0.0009
+   ],
+   "w_chosen_per_half": [
+    0.0,
+    0.1
+   ],
+   "best_w_on_all_chr13_optimistic": 0.0,
+   "best_on_all_chr13_optimistic": 0.6302
+  },
+  "C2": {
+   "cross_validated": 0.6302,
+   "minus_student": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "w_chosen_per_half": [
+    0.0,
+    0.0
+   ],
+   "best_w_on_all_chr13_optimistic": 0.0,
+   "best_on_all_chr13_optimistic": 0.6302
+  }
+ },
+ "4M_s1": {
+  "student": 0.6377,
+  "C1": {
+   "cross_validated": 0.6377,
+   "minus_student": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "w_chosen_per_half": [
+    0.0,
+    0.0
+   ],
+   "best_w_on_all_chr13_optimistic": 0.0,
+   "best_on_all_chr13_optimistic": 0.6377
+  },
+  "C2": {
+   "cross_validated": 0.6377,
+   "minus_student": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "w_chosen_per_half": [
+    0.0,
+    0.0
+   ],
+   "best_w_on_all_chr13_optimistic": 0.0,
+   "best_on_all_chr13_optimistic": 0.6377
+  }
+ },
+ "4M_s2": {
+  "student": 0.6347,
+  "C1": {
+   "cross_validated": 0.6347,
+   "minus_student": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "w_chosen_per_half": [
+    0.0,
+    0.0
+   ],
+   "best_w_on_all_chr13_optimistic": 0.0,
+   "best_on_all_chr13_optimistic": 0.6347
+  },
+  "C2": {
+   "cross_validated": 0.6347,
+   "minus_student": 0.0,
+   "ci95": [
+    0.0,
+    0.0
+   ],
+   "w_chosen_per_half": [
+    0.0,
+    0.0
+   ],
+   "best_w_on_all_chr13_optimistic": 0.0,
+   "best_on_all_chr13_optimistic": 0.6347
+  }
+ }
+}
