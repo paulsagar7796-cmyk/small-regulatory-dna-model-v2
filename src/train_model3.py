@@ -38,7 +38,8 @@ Mac GPU (MPS) memory: one training step of 2,048 rows caches about 14.7 GB of GP
 buffers cached and only tries to release them above 1.4 x the recommended working set (35 GB on a 32 GB laptop), so buffers of other
 sizes (each epoch's evaluation, the short last batch) were added on top until the laptop swapped (the PyramidLegNet run of 2026-11-19
 reached 26 GB and stalled after epoch 22). Fix: torch.mps.empty_cache() after each epoch-end evaluation. Also launch laptop runs with
-PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.8 (a hard 20 GB limit: an out-of-memory error instead of a frozen machine; resume with --resume_from).
+PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.8 PYTORCH_MPS_LOW_WATERMARK_RATIO=0.7 (hard limit 20 GB, cache release from 17.5 GB: an out-of-memory
+error instead of a frozen machine, then continue with --resume_from; the low ratio must be below the high one or PyTorch refuses to start).
 
     .venv/bin/python src/train_model3.py --mode P0
     .venv/bin/python src/train_model3.py --mode P2 --seed 2 --width 1.75
