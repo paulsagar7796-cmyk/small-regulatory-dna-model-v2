@@ -1,0 +1,84 @@
+{
+ "what": "saturation scan, practice half, autosomal backgrounds only (MPAC has no held-out networks for X); plasmid read-out for the students; MPAC = the 10 clean networks per chromosome, one centred window",
+ "backgrounds": 100,
+ "pieces": 32,
+ "by_cell": {
+  "HepG2": 55,
+  "K562": 45
+ },
+ "chromosomes_scored": [
+  "1",
+  "13",
+  "17",
+  "3",
+  "5",
+  "7",
+  "9"
+ ],
+ "chromosomes_skipped": {
+  "11": "fold crossval/test_11_12 not in data/models/MPAC",
+  "15": "fold crossval/test_8_15 not in data/models/MPAC",
+  "19": "fold crossval/test_4_19 not in data/models/MPAC",
+  "X": "MPAC has no held-out networks for X"
+ },
+ "check_P1_max_abs_difference": 0.0,
+ "device": "mps",
+ "score": {
+  "MPAC": {
+   "mean_pearson": 0.7475,
+   "HepG2": 0.7372,
+   "K562": 0.7579,
+   "mean_spearman": 0.6292
+  },
+  "P1": {
+   "mean_pearson": 0.7489,
+   "HepG2": 0.7397,
+   "K562": 0.7582
+  },
+  "4M_s1": {
+   "mean_pearson": 0.7633,
+   "HepG2": 0.7581,
+   "K562": 0.7685
+  },
+  "4M_s2": {
+   "mean_pearson": 0.7717,
+   "HepG2": 0.7644,
+   "K562": 0.7789
+  },
+  "pyramid": {
+   "mean_pearson": 0.7603,
+   "HepG2": 0.7505,
+   "K562": 0.77
+  }
+ },
+ "minus_MPAC": {
+  "P1": {
+   "diff": 0.0014,
+   "ci95": [
+    -0.0199,
+    0.022
+   ]
+  },
+  "4M_s1": {
+   "diff": 0.0158,
+   "ci95": [
+    -0.002,
+    0.0342
+   ]
+  },
+  "4M_s2": {
+   "diff": 0.0241,
+   "ci95": [
+    0.006,
+    0.0454
+   ]
+  },
+  "pyramid": {
+   "diff": 0.0127,
+   "ci95": [
+    -0.0069,
+    0.0345
+   ]
+  }
+ }
+}
