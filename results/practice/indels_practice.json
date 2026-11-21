@@ -1,0 +1,1897 @@
+{
+  "table": "data/indels/practice.parquet",
+  "variants": 2371,
+  "framing_checks": {
+    "frame_legnet_equals_pieces_on": 1000,
+    "mpac_chromosome": "13",
+    "mpac_pieces": 300,
+    "mpac_max_abs_difference": 0.0,
+    "device": "mps"
+  },
+  "student": {
+    "fixed": true,
+    "main": "more_HEPG2-K562-SKNSH-HCT116-A549_distill_t3_lam1.0_mut0.05_e25_seed20261113",
+    "seed2": "more_HEPG2-K562-SKNSH-HCT116-A549_distill_t3_lam1.0_mut0.05_e25_seed2"
+  },
+  "subset_sizes": {
+    "primary_size1-21_no_near_copy": 2141,
+    "size1-21_all": 2332,
+    "size1-54_all": 2371,
+    "deletions_primary": 1187,
+    "insertions_primary": 954,
+    "size1_no_near_copy": 1104,
+    "size2-21_no_near_copy": 1037,
+    "size22-54_no_near_copy": 39,
+    "near_copies_only_size1-21": 191
+  },
+  "subset_definitions": {
+    "primary_size1-21_no_near_copy": "size <= 21 and best_shared_words < 27",
+    "size1-21_all": "size <= 21, near-copies included",
+    "size1-54_all": "all sizes, near-copies included",
+    "deletions_primary": "primary filter, deletions",
+    "insertions_primary": "primary filter, insertions",
+    "size1_no_near_copy": "size 1 and best_shared_words < 27",
+    "size2-21_no_near_copy": "size 2 to 21 and best_shared_words < 27",
+    "size22-54_no_near_copy": "size 22 to 54 and best_shared_words < 27",
+    "near_copies_only_size1-21": "size <= 21 and best_shared_words >= 27"
+  },
+  "models": {
+    "model2": {
+      "primary_size1-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.49945326141909013,
+          "effect_variants": 373,
+          "effect_spearman": 0.3366500468717988,
+          "activity": 0.7468155374941361,
+          "activity_variants": 2133
+        },
+        "K562": {
+          "effect": 0.44563541293686687,
+          "effect_variants": 414,
+          "effect_spearman": 0.3486524685963562,
+          "activity": 0.7526605376555437,
+          "activity_variants": 2130
+        },
+        "mean_effect": 0.4725443371779785,
+        "mean_effect_spearman": 0.34265125773407745,
+        "mean_activity": 0.7497380375748399,
+        "mean_effect_ci95": [
+          0.3439670710909364,
+          0.5839509778009866
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "size1-21_all": {
+        "HepG2": {
+          "effect": 0.5216939821581176,
+          "effect_variants": 417,
+          "effect_spearman": 0.32047089601046436,
+          "activity": 0.7425550747162237,
+          "activity_variants": 2324
+        },
+        "K562": {
+          "effect": 0.49091610478446035,
+          "effect_variants": 456,
+          "effect_spearman": 0.3393360526379069,
+          "activity": 0.7539447258557261,
+          "activity_variants": 2320
+        },
+        "mean_effect": 0.506305043471289,
+        "mean_effect_spearman": 0.32990347432418565,
+        "mean_activity": 0.7482499002859749,
+        "mean_effect_ci95": [
+          0.36669588130806585,
+          0.6157417796422151
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "size1-54_all": {
+        "HepG2": {
+          "effect": 0.5596440001265248,
+          "effect_variants": 433,
+          "effect_spearman": 0.34540423982054014,
+          "activity": 0.7522763882550064,
+          "activity_variants": 2362
+        },
+        "K562": {
+          "effect": 0.5055834680477352,
+          "effect_variants": 471,
+          "effect_spearman": 0.3528654381076854,
+          "activity": 0.7659055669172878,
+          "activity_variants": 2358
+        },
+        "mean_effect": 0.53261373408713,
+        "mean_effect_spearman": 0.3491348389641128,
+        "mean_activity": 0.7590909775861472,
+        "mean_effect_ci95": [
+          0.4081573312583789,
+          0.6338407002153524
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "deletions_primary": {
+        "HepG2": {
+          "effect": 0.5751559410045299,
+          "effect_variants": 216,
+          "effect_spearman": 0.3795282153871801,
+          "activity": 0.744440710359066,
+          "activity_variants": 1182
+        },
+        "K562": {
+          "effect": 0.5184863360967805,
+          "effect_variants": 242,
+          "effect_spearman": 0.45697555630914116,
+          "activity": 0.7690007020712024,
+          "activity_variants": 1179
+        },
+        "mean_effect": 0.5468211385506552,
+        "mean_effect_spearman": 0.41825188584816064,
+        "mean_activity": 0.7567207062151342,
+        "mean_effect_ci95": [
+          0.3952278096688823,
+          0.6705405530528512
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "insertions_primary": {
+        "HepG2": {
+          "effect": 0.41520490632663487,
+          "effect_variants": 157,
+          "effect_spearman": 0.2596208113421691,
+          "activity": 0.7511489077971623,
+          "activity_variants": 951
+        },
+        "K562": {
+          "effect": 0.32749251682697383,
+          "effect_variants": 172,
+          "effect_spearman": 0.19034580671331505,
+          "activity": 0.730640397696892,
+          "activity_variants": 951
+        },
+        "mean_effect": 0.3713487115768044,
+        "mean_effect_spearman": 0.22498330902774205,
+        "mean_activity": 0.7408946527470271,
+        "mean_effect_ci95": [
+          0.19504717938182856,
+          0.537249973644827
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "size1_no_near_copy": {
+        "HepG2": {
+          "effect": 0.4679179586021488,
+          "effect_variants": 189,
+          "effect_spearman": 0.22402104552160546,
+          "activity": 0.7310413831287462,
+          "activity_variants": 1102
+        },
+        "K562": {
+          "effect": 0.32521138668997074,
+          "effect_variants": 214,
+          "effect_spearman": 0.2606298079719351,
+          "activity": 0.7311309798430203,
+          "activity_variants": 1098
+        },
+        "mean_effect": 0.39656467264605977,
+        "mean_effect_spearman": 0.24232542674677027,
+        "mean_activity": 0.7310861814858833,
+        "mean_effect_ci95": [
+          0.2190896037291778,
+          0.513198281509466
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "size2-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.5262783140485074,
+          "effect_variants": 184,
+          "effect_spearman": 0.4344108185163067,
+          "activity": 0.7644425225937246,
+          "activity_variants": 1031
+        },
+        "K562": {
+          "effect": 0.5159594517405439,
+          "effect_variants": 200,
+          "effect_spearman": 0.45240981024525617,
+          "activity": 0.7752037078882863,
+          "activity_variants": 1032
+        },
+        "mean_effect": 0.5211188828945257,
+        "mean_effect_spearman": 0.44341031438078143,
+        "mean_activity": 0.7698231152410054,
+        "mean_effect_ci95": [
+          0.35099602666384083,
+          0.6891363433319253
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "size22-54_no_near_copy": {
+        "HepG2": {
+          "effect": 0.7426068903805744,
+          "effect_variants": 16,
+          "effect_spearman": 0.7823529411764706,
+          "activity": 0.892078257272849,
+          "activity_variants": 38
+        },
+        "K562": {
+          "effect": 0.6889595251728197,
+          "effect_variants": 15,
+          "effect_spearman": 0.682142857142857,
+          "activity": 0.9195443852661467,
+          "activity_variants": 38
+        },
+        "mean_effect": 0.715783207776697,
+        "mean_effect_spearman": 0.7322478991596638,
+        "mean_activity": 0.9058113212694978,
+        "mean_effect_ci95": [
+          0.43918398337915104,
+          0.8933014118762492
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "near_copies_only_size1-21": {
+        "HepG2": {
+          "effect": 0.6888420838565714,
+          "effect_variants": 44,
+          "effect_spearman": 0.19450317124735728,
+          "activity": 0.6839312512058677,
+          "activity_variants": 191
+        },
+        "K562": {
+          "effect": 0.7556327292534778,
+          "effect_variants": 42,
+          "effect_spearman": 0.2554898306458148,
+          "activity": 0.7710766496690884,
+          "activity_variants": 190
+        },
+        "mean_effect": 0.7222374065550246,
+        "mean_effect_spearman": 0.22499650094658605,
+        "mean_activity": 0.7275039504374781,
+        "mean_effect_ci95": [
+          0.1201571095236598,
+          0.917065343593503
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "model2_seed2": {
+      "primary_size1-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.5118973303916631,
+          "effect_variants": 373,
+          "effect_spearman": 0.3642234751172489,
+          "activity": 0.7471783554538332,
+          "activity_variants": 2133
+        },
+        "K562": {
+          "effect": 0.47429307577605073,
+          "effect_variants": 414,
+          "effect_spearman": 0.3793385987364555,
+          "activity": 0.7543603687351333,
+          "activity_variants": 2130
+        },
+        "mean_effect": 0.4930952030838569,
+        "mean_effect_spearman": 0.37178103692685216,
+        "mean_activity": 0.7507693620944833,
+        "mean_effect_ci95": [
+          0.37866120936693065,
+          0.5957654098625621
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.05584437236495432,
+          0.01238424512363937
+        ]
+      },
+      "size1-21_all": {
+        "HepG2": {
+          "effect": 0.5359998636749465,
+          "effect_variants": 417,
+          "effect_spearman": 0.3576685762174214,
+          "activity": 0.7438973907219265,
+          "activity_variants": 2324
+        },
+        "K562": {
+          "effect": 0.5177369949587468,
+          "effect_variants": 456,
+          "effect_spearman": 0.3809854547157323,
+          "activity": 0.7543600025682742,
+          "activity_variants": 2320
+        },
+        "mean_effect": 0.5268684293168466,
+        "mean_effect_spearman": 0.36932701546657687,
+        "mean_activity": 0.7491286966451003,
+        "mean_effect_ci95": [
+          0.3968212663130701,
+          0.6273495195462104
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.050229220737835104,
+          0.005696664085611587
+        ]
+      },
+      "size1-54_all": {
+        "HepG2": {
+          "effect": 0.5629947971978523,
+          "effect_variants": 433,
+          "effect_spearman": 0.36440769160727443,
+          "activity": 0.7530042027950938,
+          "activity_variants": 2362
+        },
+        "K562": {
+          "effect": 0.5312354783827543,
+          "effect_variants": 471,
+          "effect_spearman": 0.3888467271988075,
+          "activity": 0.7661219351668689,
+          "activity_variants": 2358
+        },
+        "mean_effect": 0.5471151377903033,
+        "mean_effect_spearman": 0.37662720940304095,
+        "mean_activity": 0.7595630689809814,
+        "mean_effect_ci95": [
+          0.4311325686852318,
+          0.6416941352585861
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.04078778162356794,
+          0.009579033945292277
+        ]
+      },
+      "deletions_primary": {
+        "HepG2": {
+          "effect": 0.5524908621611702,
+          "effect_variants": 216,
+          "effect_spearman": 0.37760630633848935,
+          "activity": 0.7422122441861864,
+          "activity_variants": 1182
+        },
+        "K562": {
+          "effect": 0.5466095595648293,
+          "effect_variants": 242,
+          "effect_spearman": 0.4718457469620553,
+          "activity": 0.7669743923144208,
+          "activity_variants": 1179
+        },
+        "mean_effect": 0.5495502108629997,
+        "mean_effect_spearman": 0.4247260266502723,
+        "mean_activity": 0.7545933182503035,
+        "mean_effect_ci95": [
+          0.4021675112107459,
+          0.6743301608964635
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.02797312368561179,
+          0.020519818484097688
+        ]
+      },
+      "insertions_primary": {
+        "HepG2": {
+          "effect": 0.47284425325918866,
+          "effect_variants": 157,
+          "effect_spearman": 0.34255980252916474,
+          "activity": 0.7552046705067017,
+          "activity_variants": 951
+        },
+        "K562": {
+          "effect": 0.35336664977653215,
+          "effect_variants": 172,
+          "effect_spearman": 0.2574931076851963,
+          "activity": 0.7375132250828145,
+          "activity_variants": 951
+        },
+        "mean_effect": 0.4131054515178604,
+        "mean_effect_spearman": 0.3000264551071805,
+        "mean_activity": 0.7463589477947581,
+        "mean_effect_ci95": [
+          0.2555783893887233,
+          0.5503985921872764
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.10858886088027475,
+          0.028428237277649256
+        ]
+      },
+      "size1_no_near_copy": {
+        "HepG2": {
+          "effect": 0.48799120018779746,
+          "effect_variants": 189,
+          "effect_spearman": 0.31580191613786246,
+          "activity": 0.7322250814456694,
+          "activity_variants": 1102
+        },
+        "K562": {
+          "effect": 0.3511893602386472,
+          "effect_variants": 214,
+          "effect_spearman": 0.2826017614052059,
+          "activity": 0.7353130532332409,
+          "activity_variants": 1098
+        },
+        "mean_effect": 0.4195902802132223,
+        "mean_effect_spearman": 0.29920183877153417,
+        "mean_activity": 0.7337690673394552,
+        "mean_effect_ci95": [
+          0.2605947419126975,
+          0.5365945063613878
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.06970017382739457,
+          0.009833387650074384
+        ]
+      },
+      "size2-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.5327342800268772,
+          "effect_variants": 184,
+          "effect_spearman": 0.41246171331702336,
+          "activity": 0.7643080293816313,
+          "activity_variants": 1031
+        },
+        "K562": {
+          "effect": 0.5480235232906117,
+          "effect_variants": 200,
+          "effect_spearman": 0.4732948323708093,
+          "activity": 0.7746104329045884,
+          "activity_variants": 1032
+        },
+        "mean_effect": 0.5403789016587444,
+        "mean_effect_spearman": 0.44287827284391634,
+        "mean_activity": 0.7694592311431099,
+        "mean_effect_ci95": [
+          0.39156921424102664,
+          0.6865263132623822
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.06633865998414831,
+          0.03217305041487132
+        ]
+      },
+      "size22-54_no_near_copy": {
+        "HepG2": {
+          "effect": 0.6936346885987352,
+          "effect_variants": 16,
+          "effect_spearman": 0.5764705882352941,
+          "activity": 0.8896164762657548,
+          "activity_variants": 38
+        },
+        "K562": {
+          "effect": 0.7244287694767401,
+          "effect_variants": 15,
+          "effect_spearman": 0.7,
+          "activity": 0.9167331672611794,
+          "activity_variants": 38
+        },
+        "mean_effect": 0.7090317290377377,
+        "mean_effect_spearman": 0.638235294117647,
+        "mean_activity": 0.9031748217634671,
+        "mean_effect_ci95": [
+          0.34357393299971095,
+          0.9062365471469604
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.08295572790296907,
+          0.13937305688817483
+        ]
+      },
+      "near_copies_only_size1-21": {
+        "HepG2": {
+          "effect": 0.7117391463754924,
+          "effect_variants": 44,
+          "effect_spearman": 0.3488372093023256,
+          "activity": 0.6990517487319166,
+          "activity_variants": 191
+        },
+        "K562": {
+          "effect": 0.7764536180622661,
+          "effect_variants": 42,
+          "effect_spearman": 0.4543391945547362,
+          "activity": 0.7546706208792517,
+          "activity_variants": 190
+        },
+        "mean_effect": 0.7440963822188793,
+        "mean_effect_spearman": 0.4015882019285309,
+        "mean_activity": 0.7268611848055841,
+        "mean_effect_ci95": [
+          0.2262394903586328,
+          0.9255490892300334
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.19921147338967254,
+          0.005090954593031723
+        ]
+      }
+    },
+    "student_v2": {
+      "primary_size1-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.4297059277036626,
+          "effect_variants": 373,
+          "effect_spearman": 0.2975822753841892,
+          "activity": 0.5451226048966777,
+          "activity_variants": 2133
+        },
+        "K562": {
+          "effect": 0.3666862191385856,
+          "effect_variants": 414,
+          "effect_spearman": 0.26447586323819333,
+          "activity": 0.5980406755201173,
+          "activity_variants": 2130
+        },
+        "mean_effect": 0.3981960734211241,
+        "mean_effect_spearman": 0.28102906931119126,
+        "mean_activity": 0.5715816402083975,
+        "mean_effect_ci95": [
+          0.3051412628296436,
+          0.484100377732906
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.006445214491124851,
+          0.1408250978202183
+        ]
+      },
+      "size1-21_all": {
+        "HepG2": {
+          "effect": 0.46416705026537036,
+          "effect_variants": 417,
+          "effect_spearman": 0.29266469047801874,
+          "activity": 0.5401742104786932,
+          "activity_variants": 2324
+        },
+        "K562": {
+          "effect": 0.4269228252814601,
+          "effect_variants": 456,
+          "effect_spearman": 0.2661189668330058,
+          "activity": 0.589820095814672,
+          "activity_variants": 2320
+        },
+        "mean_effect": 0.4455449377734152,
+        "mean_effect_spearman": 0.27939182865551226,
+        "mean_activity": 0.5649971531466826,
+        "mean_effect_ci95": [
+          0.31762109063715455,
+          0.5557931653338872
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.003353058688251014,
+          0.12548379465532672
+        ]
+      },
+      "size1-54_all": {
+        "HepG2": {
+          "effect": 0.4935341602861292,
+          "effect_variants": 433,
+          "effect_spearman": 0.32371335506811927,
+          "activity": 0.5518114626300942,
+          "activity_variants": 2362
+        },
+        "K562": {
+          "effect": 0.4515509923045513,
+          "effect_variants": 471,
+          "effect_spearman": 0.29806562829467964,
+          "activity": 0.605414965806628,
+          "activity_variants": 2358
+        },
+        "mean_effect": 0.47254257629534024,
+        "mean_effect_spearman": 0.31088949168139945,
+        "mean_activity": 0.5786132142183611,
+        "mean_effect_ci95": [
+          0.3459427471718838,
+          0.5799960901453242
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.006549408726674587,
+          0.1234774766879489
+        ]
+      },
+      "deletions_primary": {
+        "HepG2": {
+          "effect": 0.5006087457670165,
+          "effect_variants": 216,
+          "effect_spearman": 0.34878838757308367,
+          "activity": 0.5558971776764813,
+          "activity_variants": 1182
+        },
+        "K562": {
+          "effect": 0.3805830164580607,
+          "effect_variants": 242,
+          "effect_spearman": 0.3119577517917767,
+          "activity": 0.6071876525881179,
+          "activity_variants": 1179
+        },
+        "mean_effect": 0.4405958811125386,
+        "mean_effect_spearman": 0.3303730696824302,
+        "mean_activity": 0.5815424151322997,
+        "mean_effect_ci95": [
+          0.307210208422766,
+          0.5522257784615163
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.032883653046810346,
+          0.16636160403428232
+        ]
+      },
+      "insertions_primary": {
+        "HepG2": {
+          "effect": 0.34768755559753317,
+          "effect_variants": 157,
+          "effect_spearman": 0.2333306458114972,
+          "activity": 0.5319074661347454,
+          "activity_variants": 951
+        },
+        "K562": {
+          "effect": 0.3423138656751759,
+          "effect_variants": 172,
+          "effect_spearman": 0.1913103770314346,
+          "activity": 0.5855219849431215,
+          "activity_variants": 951
+        },
+        "mean_effect": 0.3450007106363545,
+        "mean_effect_spearman": 0.2123205114214659,
+        "mean_activity": 0.5587147255389334,
+        "mean_effect_ci95": [
+          0.22492411201766727,
+          0.45375367984636983
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.09445631472454631,
+          0.15602833618037304
+        ]
+      },
+      "size1_no_near_copy": {
+        "HepG2": {
+          "effect": 0.41004036558057827,
+          "effect_variants": 189,
+          "effect_spearman": 0.3482429477950195,
+          "activity": 0.5359056950118708,
+          "activity_variants": 1102
+        },
+        "K562": {
+          "effect": 0.30898343964237945,
+          "effect_variants": 214,
+          "effect_spearman": 0.25618864239556005,
+          "activity": 0.565997583208898,
+          "activity_variants": 1098
+        },
+        "mean_effect": 0.35951190261147886,
+        "mean_effect_spearman": 0.3022157950952898,
+        "mean_activity": 0.5509516391103844,
+        "mean_effect_ci95": [
+          0.2415065045001186,
+          0.4661055003213724
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.07082975459265592,
+          0.13206228244893836
+        ]
+      },
+      "size2-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.44831976795021483,
+          "effect_variants": 184,
+          "effect_spearman": 0.2536841902486949,
+          "activity": 0.5564157319307858,
+          "activity_variants": 1031
+        },
+        "K562": {
+          "effect": 0.4073076599367733,
+          "effect_variants": 200,
+          "effect_spearman": 0.2813620340508513,
+          "activity": 0.6314429852475074,
+          "activity_variants": 1032
+        },
+        "mean_effect": 0.4278137139434941,
+        "mean_effect_spearman": 0.2675231121497731,
+        "mean_activity": 0.5939293585891465,
+        "mean_effect_ci95": [
+          0.29133854655536695,
+          0.5503720758357455
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.005149813405013583,
+          0.18049594010821796
+        ]
+      },
+      "size22-54_no_near_copy": {
+        "HepG2": {
+          "effect": 0.6448631970312956,
+          "effect_variants": 16,
+          "effect_spearman": 0.7411764705882353,
+          "activity": 0.749820553748363,
+          "activity_variants": 38
+        },
+        "K562": {
+          "effect": 0.7517934146851876,
+          "effect_variants": 15,
+          "effect_spearman": 0.7035714285714285,
+          "activity": 0.7835589559309183,
+          "activity_variants": 38
+        },
+        "mean_effect": 0.6983283058582416,
+        "mean_effect_spearman": 0.7223739495798319,
+        "mean_activity": 0.7666897548396406,
+        "mean_effect_ci95": [
+          0.3140669409790441,
+          0.9265475219718434
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.2238029382638669,
+          0.31582441722036814
+        ]
+      },
+      "near_copies_only_size1-21": {
+        "HepG2": {
+          "effect": 0.6976434855852558,
+          "effect_variants": 44,
+          "effect_spearman": 0.28710359408033825,
+          "activity": 0.5283282301087121,
+          "activity_variants": 191
+        },
+        "K562": {
+          "effect": 0.7475751827487929,
+          "effect_variants": 42,
+          "effect_spearman": 0.2720200956162385,
+          "activity": 0.5726221103458882,
+          "activity_variants": 190
+        },
+        "mean_effect": 0.7226093341670243,
+        "mean_effect_spearman": 0.2795618448482884,
+        "mean_activity": 0.5504751702273001,
+        "mean_effect_ci95": [
+          0.13416998126361795,
+          0.9168169893158925
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.1373668681693019,
+          0.14140003639054805
+        ]
+      }
+    },
+    "student_v2_seed2": {
+      "primary_size1-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.3892742243990515,
+          "effect_variants": 373,
+          "effect_spearman": 0.290853963939007,
+          "activity": 0.5313832390045051,
+          "activity_variants": 2133
+        },
+        "K562": {
+          "effect": 0.38329899217273794,
+          "effect_variants": 414,
+          "effect_spearman": 0.28694265428912197,
+          "activity": 0.5845957141604312,
+          "activity_variants": 2130
+        },
+        "mean_effect": 0.38628660828589473,
+        "mean_effect_spearman": 0.28889830911406444,
+        "mean_activity": 0.5579894765824682,
+        "mean_effect_ci95": [
+          0.28759697510509347,
+          0.47865091444745483
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.019873430078766328,
+          0.15349424532220685
+        ]
+      },
+      "size1-21_all": {
+        "HepG2": {
+          "effect": 0.42618926824680786,
+          "effect_variants": 417,
+          "effect_spearman": 0.2748266973465762,
+          "activity": 0.5288772574372044,
+          "activity_variants": 2324
+        },
+        "K562": {
+          "effect": 0.43918391294994197,
+          "effect_variants": 456,
+          "effect_spearman": 0.2806807036105666,
+          "activity": 0.5777806894740379,
+          "activity_variants": 2320
+        },
+        "mean_effect": 0.4326865905983749,
+        "mean_effect_spearman": 0.2777537004785714,
+        "mean_activity": 0.5533289734556212,
+        "mean_effect_ci95": [
+          0.29955872152557067,
+          0.5470999518038747
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.016451707105124624,
+          0.140754726692497
+        ]
+      },
+      "size1-54_all": {
+        "HepG2": {
+          "effect": 0.46289042091718957,
+          "effect_variants": 433,
+          "effect_spearman": 0.30098864895482635,
+          "activity": 0.5407124692582663,
+          "activity_variants": 2362
+        },
+        "K562": {
+          "effect": 0.45367194640122427,
+          "effect_variants": 471,
+          "effect_spearman": 0.30968885591497636,
+          "activity": 0.595619026776036,
+          "activity_variants": 2358
+        },
+        "mean_effect": 0.4582811836592069,
+        "mean_effect_spearman": 0.3053387524349014,
+        "mean_activity": 0.5681657480171511,
+        "mean_effect_ci95": [
+          0.3186536038337203,
+          0.5695102043349414
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.01961204883362632,
+          0.14228885144912692
+        ]
+      },
+      "deletions_primary": {
+        "HepG2": {
+          "effect": 0.44402731565229797,
+          "effect_variants": 216,
+          "effect_spearman": 0.3215470534300241,
+          "activity": 0.5418030030300025,
+          "activity_variants": 1182
+        },
+        "K562": {
+          "effect": 0.39715970682167256,
+          "effect_variants": 242,
+          "effect_spearman": 0.27614888987955755,
+          "activity": 0.5919853642751225,
+          "activity_variants": 1179
+        },
+        "mean_effect": 0.4205935112369853,
+        "mean_effect_spearman": 0.2988479716547908,
+        "mean_activity": 0.5668941836525625,
+        "mean_effect_ci95": [
+          0.2705444619939334,
+          0.5511610443827569
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.06218991592266495,
+          0.18582150993840213
+        ]
+      },
+      "insertions_primary": {
+        "HepG2": {
+          "effect": 0.3363948598269709,
+          "effect_variants": 157,
+          "effect_spearman": 0.23261431787594813,
+          "activity": 0.5187011990134999,
+          "activity_variants": 951
+        },
+        "K562": {
+          "effect": 0.3614873641013906,
+          "effect_variants": 172,
+          "effect_spearman": 0.2830011579560542,
+          "activity": 0.5746051114364742,
+          "activity_variants": 951
+        },
+        "mean_effect": 0.34894111196418076,
+        "mean_effect_spearman": 0.25780773791600115,
+        "mean_activity": 0.546653155224987,
+        "mean_effect_ci95": [
+          0.22827041018954633,
+          0.4519468107307996
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.11593472343190672,
+          0.1720712730221974
+        ]
+      },
+      "size1_no_near_copy": {
+        "HepG2": {
+          "effect": 0.3090724740352297,
+          "effect_variants": 189,
+          "effect_spearman": 0.3257807639666543,
+          "activity": 0.5241041516395929,
+          "activity_variants": 1102
+        },
+        "K562": {
+          "effect": 0.3337040529531091,
+          "effect_variants": 214,
+          "effect_spearman": 0.30622308071423543,
+          "activity": 0.5593025736980316,
+          "activity_variants": 1098
+        },
+        "mean_effect": 0.3213882634941694,
+        "mean_effect_spearman": 0.3160019223404449,
+        "mean_activity": 0.5417033626688122,
+        "mean_effect_ci95": [
+          0.18859250439245356,
+          0.4450203251024231
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.04242232940440208,
+          0.17255627946875823
+        ]
+      },
+      "size2-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.4473662266027636,
+          "effect_variants": 184,
+          "effect_spearman": 0.26186164782030785,
+          "activity": 0.5404344173052746,
+          "activity_variants": 1031
+        },
+        "K562": {
+          "effect": 0.42296856410846484,
+          "effect_variants": 200,
+          "effect_spearman": 0.2836120903022576,
+          "activity": 0.6109818792323094,
+          "activity_variants": 1032
+        },
+        "mean_effect": 0.4351673953556142,
+        "mean_effect_spearman": 0.2727368690612827,
+        "mean_activity": 0.575708148268792,
+        "mean_effect_ci95": [
+          0.29284989293166985,
+          0.5665760754724937
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.012973339692747676,
+          0.17104455173835142
+        ]
+      },
+      "size22-54_no_near_copy": {
+        "HepG2": {
+          "effect": 0.635068728044478,
+          "effect_variants": 16,
+          "effect_spearman": 0.6441176470588235,
+          "activity": 0.7501716941371118,
+          "activity_variants": 38
+        },
+        "K562": {
+          "effect": 0.7003118634593154,
+          "effect_variants": 15,
+          "effect_spearman": 0.6892857142857142,
+          "activity": 0.8040085293696273,
+          "activity_variants": 38
+        },
+        "mean_effect": 0.6676902957518966,
+        "mean_effect_spearman": 0.6667016806722688,
+        "mean_activity": 0.7770901117533695,
+        "mean_effect_ci95": [
+          0.22674888066963766,
+          0.9209280921919664
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.2071121230292066,
+          0.41252621657198113
+        ]
+      },
+      "near_copies_only_size1-21": {
+        "HepG2": {
+          "effect": 0.6731666218678488,
+          "effect_variants": 44,
+          "effect_spearman": 0.23735024665257223,
+          "activity": 0.5442226920444745,
+          "activity_variants": 191
+        },
+        "K562": {
+          "effect": 0.742665278496142,
+          "effect_variants": 42,
+          "effect_spearman": 0.2653755773438133,
+          "activity": 0.5716001075849932,
+          "activity_variants": 190
+        },
+        "mean_effect": 0.7079159501819954,
+        "mean_effect_spearman": 0.2513629119981928,
+        "mean_activity": 0.5579113998147338,
+        "mean_effect_ci95": [
+          0.042772777606444566,
+          0.9133196923870958
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.043725210737037376,
+          0.22981440686656204
+        ]
+      }
+    },
+    "published": {
+      "primary_size1-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.3022580236466131,
+          "effect_variants": 373,
+          "effect_spearman": 0.2311834123316997,
+          "activity": 0.5126463800573331,
+          "activity_variants": 2133
+        },
+        "K562": {
+          "effect": 0.3069629740740325,
+          "effect_variants": 414,
+          "effect_spearman": 0.1998491492023468,
+          "activity": 0.5715883660143608,
+          "activity_variants": 2130
+        },
+        "mean_effect": 0.30461049886032276,
+        "mean_effect_spearman": 0.21551628076702325,
+        "mean_activity": 0.542117373035847,
+        "mean_effect_ci95": [
+          0.20928054955231132,
+          0.39479852879941413
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.07750072462441937,
+          0.254632497350034
+        ]
+      },
+      "size1-21_all": {
+        "HepG2": {
+          "effect": 0.34886008752718534,
+          "effect_variants": 417,
+          "effect_spearman": 0.21424077153441032,
+          "activity": 0.5128590933517455,
+          "activity_variants": 2324
+        },
+        "K562": {
+          "effect": 0.37000594366770406,
+          "effect_variants": 456,
+          "effect_spearman": 0.20480223450395052,
+          "activity": 0.5611538264207625,
+          "activity_variants": 2320
+        },
+        "mean_effect": 0.35943301559744467,
+        "mean_effect_spearman": 0.20952150301918043,
+        "mean_activity": 0.5370064598862541,
+        "mean_effect_ci95": [
+          0.2142417710526234,
+          0.489245979415202
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.06309259657752594,
+          0.2454500089689734
+        ]
+      },
+      "size1-54_all": {
+        "HepG2": {
+          "effect": 0.3846097847959301,
+          "effect_variants": 433,
+          "effect_spearman": 0.23632174814846346,
+          "activity": 0.5178920018944827,
+          "activity_variants": 2362
+        },
+        "K562": {
+          "effect": 0.39277315533458934,
+          "effect_variants": 471,
+          "effect_spearman": 0.23852354712525928,
+          "activity": 0.5777490240885795,
+          "activity_variants": 2358
+        },
+        "mean_effect": 0.3886914700652597,
+        "mean_effect_spearman": 0.23742264763686138,
+        "mean_activity": 0.5478205129915311,
+        "mean_effect_ci95": [
+          0.2502476226498641,
+          0.5091709695620168
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.07007364532680241,
+          0.2324000574818588
+        ]
+      },
+      "deletions_primary": {
+        "HepG2": {
+          "effect": 0.3728341094592742,
+          "effect_variants": 216,
+          "effect_spearman": 0.2824991962276283,
+          "activity": 0.5286698812853715,
+          "activity_variants": 1182
+        },
+        "K562": {
+          "effect": 0.3284884802622935,
+          "effect_variants": 242,
+          "effect_spearman": 0.2074540619743688,
+          "activity": 0.5775856366602223,
+          "activity_variants": 1179
+        },
+        "mean_effect": 0.35066129486078385,
+        "mean_effect_spearman": 0.24497662910099854,
+        "mean_activity": 0.553127758972797,
+        "mean_effect_ci95": [
+          0.2088148876694602,
+          0.4762314020617299
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.10662576261864291,
+          0.27578250248660396
+        ]
+      },
+      "insertions_primary": {
+        "HepG2": {
+          "effect": 0.21813820123069463,
+          "effect_variants": 157,
+          "effect_spearman": 0.16001091547330362,
+          "activity": 0.49248540294724513,
+          "activity_variants": 951
+        },
+        "K562": {
+          "effect": 0.27575554647992867,
+          "effect_variants": 172,
+          "effect_spearman": 0.16325765347634444,
+          "activity": 0.5633128762748845,
+          "activity_variants": 951
+        },
+        "mean_effect": 0.24694687385531167,
+        "mean_effect_spearman": 0.16163428447482403,
+        "mean_activity": 0.5278991396110648,
+        "mean_effect_ci95": [
+          0.13487539273422397,
+          0.35569629242698875
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.03545383363519894,
+          0.29999360447202655
+        ]
+      },
+      "size1_no_near_copy": {
+        "HepG2": {
+          "effect": 0.23693639751094203,
+          "effect_variants": 189,
+          "effect_spearman": 0.223523347375531,
+          "activity": 0.5044657120214799,
+          "activity_variants": 1102
+        },
+        "K562": {
+          "effect": 0.2270888026228228,
+          "effect_variants": 214,
+          "effect_spearman": 0.16181846567341454,
+          "activity": 0.5392236225789329,
+          "activity_variants": 1098
+        },
+        "mean_effect": 0.2320126000668824,
+        "mean_effect_spearman": 0.19267090652447277,
+        "mean_activity": 0.5218446673002064,
+        "mean_effect_ci95": [
+          0.12419407612356255,
+          0.34564993150614587
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.028060621080053087,
+          0.2918839943914732
+        ]
+      },
+      "size2-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.35767195584573347,
+          "effect_variants": 184,
+          "effect_spearman": 0.2353643736394984,
+          "activity": 0.5221968011323282,
+          "activity_variants": 1031
+        },
+        "K562": {
+          "effect": 0.37073638186698143,
+          "effect_variants": 200,
+          "effect_spearman": 0.252246306157654,
+          "activity": 0.6043472074841242,
+          "activity_variants": 1032
+        },
+        "mean_effect": 0.3642041688563574,
+        "mean_effect_spearman": 0.24380533989857617,
+        "mean_activity": 0.5632720043082262,
+        "mean_effect_ci95": [
+          0.225506093585482,
+          0.4944325893852407
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.04971834853289367,
+          0.2747295569252378
+        ]
+      },
+      "size22-54_no_near_copy": {
+        "HepG2": {
+          "effect": 0.592261482245772,
+          "effect_variants": 16,
+          "effect_spearman": 0.5970588235294118,
+          "activity": 0.5584905247626007,
+          "activity_variants": 38
+        },
+        "K562": {
+          "effect": 0.6218755464489479,
+          "effect_variants": 15,
+          "effect_spearman": 0.6892857142857142,
+          "activity": 0.7831572453141813,
+          "activity_variants": 38
+        },
+        "mean_effect": 0.60706851434736,
+        "mean_effect_spearman": 0.643172268907563,
+        "mean_activity": 0.670823885038391,
+        "mean_effect_ci95": [
+          0.15513020338599623,
+          0.8775281213226702
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.13019603385154196,
+          0.4848420040378048
+        ]
+      },
+      "near_copies_only_size1-21": {
+        "HepG2": {
+          "effect": 0.6326218932678526,
+          "effect_variants": 44,
+          "effect_spearman": 0.10176180408738549,
+          "activity": 0.5372203185685336,
+          "activity_variants": 191
+        },
+        "K562": {
+          "effect": 0.7163687875709426,
+          "effect_variants": 42,
+          "effect_spearman": 0.2595413661777814,
+          "activity": 0.5697524007696491,
+          "activity_variants": 190
+        },
+        "mean_effect": 0.6744953404193976,
+        "mean_effect_spearman": 0.18065158513258345,
+        "mean_activity": 0.5534863596690913,
+        "mean_effect_ci95": [
+          -0.014934144660112244,
+          0.8951670461771709
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.01274590254735148,
+          0.32764456138771586
+        ]
+      }
+    },
+    "baseline": {
+      "primary_size1-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.14422967995151706,
+          "effect_variants": 373,
+          "effect_spearman": 0.060661040201712035,
+          "activity": 0.355219076224381,
+          "activity_variants": 2133
+        },
+        "K562": {
+          "effect": 0.17785398240900513,
+          "effect_variants": 414,
+          "effect_spearman": 0.13257148479992586,
+          "activity": 0.40401540487248677,
+          "activity_variants": 2130
+        },
+        "mean_effect": 0.1610418311802611,
+        "mean_effect_spearman": 0.09661626250081895,
+        "mean_activity": 0.3796172405484339,
+        "mean_effect_ci95": [
+          0.06202204890159638,
+          0.24872121854271328
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.22175011819339482,
+          0.39587014795871095
+        ]
+      },
+      "size1-21_all": {
+        "HepG2": {
+          "effect": 0.1734886581924542,
+          "effect_variants": 417,
+          "effect_spearman": 0.07315312594513476,
+          "activity": 0.35204679882206513,
+          "activity_variants": 2324
+        },
+        "K562": {
+          "effect": 0.20435471282302498,
+          "effect_variants": 456,
+          "effect_spearman": 0.12683345410318547,
+          "activity": 0.39722735070628484,
+          "activity_variants": 2320
+        },
+        "mean_effect": 0.18892168550773958,
+        "mean_effect_spearman": 0.09999329002416012,
+        "mean_activity": 0.37463707476417496,
+        "mean_effect_ci95": [
+          0.0784223049069846,
+          0.2921870341818614
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.23376469259316704,
+          0.39086122101240733
+        ]
+      },
+      "size1-54_all": {
+        "HepG2": {
+          "effect": 0.21546631629535165,
+          "effect_variants": 433,
+          "effect_spearman": 0.08458532622801491,
+          "activity": 0.36016188663290283,
+          "activity_variants": 2362
+        },
+        "K562": {
+          "effect": 0.2322193586061343,
+          "effect_variants": 471,
+          "effect_spearman": 0.14145852383131768,
+          "activity": 0.4099075156728384,
+          "activity_variants": 2358
+        },
+        "mean_effect": 0.22384283745074296,
+        "mean_effect_spearman": 0.11302192502966629,
+        "mean_activity": 0.38503470115287064,
+        "mean_effect_ci95": [
+          0.11057887283480113,
+          0.3279610271472961
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.2346687251423524,
+          0.3788629415827012
+        ]
+      },
+      "deletions_primary": {
+        "HepG2": {
+          "effect": 0.20064667872687816,
+          "effect_variants": 216,
+          "effect_spearman": 0.08400013647902181,
+          "activity": 0.37073364049964513,
+          "activity_variants": 1182
+        },
+        "K562": {
+          "effect": 0.17183191578384974,
+          "effect_variants": 242,
+          "effect_spearman": 0.1471208734494333,
+          "activity": 0.4091821422781509,
+          "activity_variants": 1179
+        },
+        "mean_effect": 0.18623929725536395,
+        "mean_effect_spearman": 0.11556050496422757,
+        "mean_activity": 0.389957891388898,
+        "mean_effect_ci95": [
+          0.04828041430484776,
+          0.3138468230684844
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.24902316922036463,
+          0.4527267525670603
+        ]
+      },
+      "insertions_primary": {
+        "HepG2": {
+          "effect": 0.07233041862049412,
+          "effect_variants": 157,
+          "effect_spearman": 0.03825068077545193,
+          "activity": 0.3356020335819085,
+          "activity_variants": 951
+        },
+        "K562": {
+          "effect": 0.15564009235440618,
+          "effect_variants": 172,
+          "effect_spearman": 0.041355003968984345,
+          "activity": 0.3971468947488394,
+          "activity_variants": 951
+        },
+        "mean_effect": 0.11398525548745014,
+        "mean_effect_spearman": 0.039802842372218136,
+        "mean_activity": 0.36637446416537395,
+        "mean_effect_ci95": [
+          -0.023560524215343753,
+          0.23989310927535473
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.11442000695697742,
+          0.41606504519227877
+        ]
+      },
+      "size1_no_near_copy": {
+        "HepG2": {
+          "effect": 0.1934152357688369,
+          "effect_variants": 189,
+          "effect_spearman": 0.1207964870326395,
+          "activity": 0.33973101350680396,
+          "activity_variants": 1102
+        },
+        "K562": {
+          "effect": 0.15558471768308918,
+          "effect_variants": 214,
+          "effect_spearman": 0.11968612236727935,
+          "activity": 0.37195122208104514,
+          "activity_variants": 1098
+        },
+        "mean_effect": 0.17449997672596304,
+        "mean_effect_spearman": 0.12024130469995942,
+        "mean_activity": 0.3558411177939246,
+        "mean_effect_ci95": [
+          0.029390913139531336,
+          0.30045324157543907
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.0971272351358348,
+          0.33043234488992085
+        ]
+      },
+      "size2-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.12074921959817105,
+          "effect_variants": 184,
+          "effect_spearman": 0.03608007370321285,
+          "activity": 0.3721106884751311,
+          "activity_variants": 1031
+        },
+        "K562": {
+          "effect": 0.1919015990795525,
+          "effect_variants": 200,
+          "effect_spearman": 0.1589947614772625,
+          "activity": 0.436717785889165,
+          "activity_variants": 1032
+        },
+        "mean_effect": 0.15632540933886177,
+        "mean_effect_spearman": 0.09753741759023768,
+        "mean_activity": 0.4044142371821481,
+        "mean_effect_ci95": [
+          0.023101497204690024,
+          0.29202377670611873
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.23893214269496257,
+          0.48842016210567757
+        ]
+      },
+      "size22-54_no_near_copy": {
+        "HepG2": {
+          "effect": 0.37470737208064486,
+          "effect_variants": 16,
+          "effect_spearman": 0.37058823529411766,
+          "activity": 0.5671325027430659,
+          "activity_variants": 38
+        },
+        "K562": {
+          "effect": 0.4219216952449958,
+          "effect_variants": 15,
+          "effect_spearman": 0.48214285714285704,
+          "activity": 0.5909155236904847,
+          "activity_variants": 38
+        },
+        "mean_effect": 0.3983145336628203,
+        "mean_effect_spearman": 0.4263655462184873,
+        "mean_activity": 0.5790240132167753,
+        "mean_effect_ci95": [
+          -0.015532909114370752,
+          0.6961949125157456
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          0.15568786806025978,
+          0.5891260372459581
+        ]
+      },
+      "near_copies_only_size1-21": {
+        "HepG2": {
+          "effect": 0.4493496501833338,
+          "effect_variants": 44,
+          "effect_spearman": 0.21308419497083225,
+          "activity": 0.31351968106478023,
+          "activity_variants": 191
+        },
+        "K562": {
+          "effect": 0.4000106469547049,
+          "effect_variants": 42,
+          "effect_spearman": 0.046834483622680494,
+          "activity": 0.3387858316437745,
+          "activity_variants": 190
+        },
+        "mean_effect": 0.42468014856901937,
+        "mean_effect_spearman": 0.12995933929675638,
+        "mean_activity": 0.3261527563542774,
+        "mean_effect_ci95": [
+          -0.06851336158894786,
+          0.7969623664879573
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.0007927484835637854,
+          0.4546225309611834
+        ]
+      }
+    },
+    "mpac": {
+      "primary_size1-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.5326712336430048,
+          "effect_variants": 373,
+          "effect_spearman": 0.3637848179769419,
+          "activity": 0.7747830816053772,
+          "activity_variants": 2133
+        },
+        "K562": {
+          "effect": 0.49506149863580473,
+          "effect_variants": 414,
+          "effect_spearman": 0.40134844039808043,
+          "activity": 0.7863949795049182,
+          "activity_variants": 2130
+        },
+        "mean_effect": 0.5138663661394047,
+        "mean_effect_spearman": 0.38256662918751116,
+        "mean_activity": 0.7805890305551477,
+        "mean_effect_ci95": [
+          0.4014931172374371,
+          0.6179888321425356
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.09281655329208227,
+          0.010635464164258396
+        ]
+      },
+      "size1-21_all": {
+        "HepG2": {
+          "effect": 0.5495275260427772,
+          "effect_variants": 417,
+          "effect_spearman": 0.35435543725490715,
+          "activity": 0.7732178131216181,
+          "activity_variants": 2324
+        },
+        "K562": {
+          "effect": 0.5341144811339922,
+          "effect_variants": 456,
+          "effect_spearman": 0.4134266401570329,
+          "activity": 0.7867004491450982,
+          "activity_variants": 2320
+        },
+        "mean_effect": 0.5418210035883847,
+        "mean_effect_spearman": 0.38389103870597,
+        "mean_activity": 0.7799591311333581,
+        "mean_effect_ci95": [
+          0.4168212348823482,
+          0.6445760662945803
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.08250930452181439,
+          0.011335801864393737
+        ]
+      },
+      "size1-54_all": {
+        "HepG2": {
+          "effect": 0.5674840269654298,
+          "effect_variants": 433,
+          "effect_spearman": 0.3697188490733152,
+          "activity": 0.7815563673582694,
+          "activity_variants": 2362
+        },
+        "K562": {
+          "effect": 0.533154926835353,
+          "effect_variants": 471,
+          "effect_spearman": 0.4186146669086115,
+          "activity": 0.797931814412532,
+          "activity_variants": 2358
+        },
+        "mean_effect": 0.5503194769003914,
+        "mean_effect_spearman": 0.39416675799096335,
+        "mean_activity": 0.7897440908854008,
+        "mean_effect_ci95": [
+          0.43457499032268976,
+          0.6443035031057072
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.0636279537028197,
+          0.02465521817455717
+        ]
+      },
+      "deletions_primary": {
+        "HepG2": {
+          "effect": 0.5856511474161612,
+          "effect_variants": 216,
+          "effect_spearman": 0.37497350528108214,
+          "activity": 0.7762055078900406,
+          "activity_variants": 1182
+        },
+        "K562": {
+          "effect": 0.5362078172141199,
+          "effect_variants": 242,
+          "effect_spearman": 0.44934825432750747,
+          "activity": 0.8026003221041561,
+          "activity_variants": 1179
+        },
+        "mean_effect": 0.5609294823151405,
+        "mean_effect_spearman": 0.41216087980429483,
+        "mean_activity": 0.7894029149970984,
+        "mean_effect_ci95": [
+          0.39200664998278134,
+          0.6919399495656631
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.07270182854125284,
+          0.04815238500661288
+        ]
+      },
+      "insertions_primary": {
+        "HepG2": {
+          "effect": 0.47599149702473403,
+          "effect_variants": 157,
+          "effect_spearman": 0.3341220176260086,
+          "activity": 0.7740913629546504,
+          "activity_variants": 951
+        },
+        "K562": {
+          "effect": 0.41626511117894166,
+          "effect_variants": 172,
+          "effect_spearman": 0.3105727755334027,
+          "activity": 0.7646048395458371,
+          "activity_variants": 951
+        },
+        "mean_effect": 0.44612830410183785,
+        "mean_effect_spearman": 0.3223473965797057,
+        "mean_activity": 0.7693481012502438,
+        "mean_effect_ci95": [
+          0.30907356294854554,
+          0.562771852781175
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.180928012374708,
+          0.03320424514444772
+        ]
+      },
+      "size1_no_near_copy": {
+        "HepG2": {
+          "effect": 0.4635314647657755,
+          "effect_variants": 189,
+          "effect_spearman": 0.30798805524449424,
+          "activity": 0.7529372872823855,
+          "activity_variants": 1102
+        },
+        "K562": {
+          "effect": 0.38364903967521957,
+          "effect_variants": 214,
+          "effect_spearman": 0.3525608333767001,
+          "activity": 0.767124967315491,
+          "activity_variants": 1098
+        },
+        "mean_effect": 0.4235902522204975,
+        "mean_effect_spearman": 0.33027444431059716,
+        "mean_activity": 0.7600311272989382,
+        "mean_effect_ci95": [
+          0.27041544733634454,
+          0.5351240706488386
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.11217708904791748,
+          0.03885771311306959
+        ]
+      },
+      "size2-21_no_near_copy": {
+        "HepG2": {
+          "effect": 0.5890566713398316,
+          "effect_variants": 184,
+          "effect_spearman": 0.4122575176744813,
+          "activity": 0.798534976404834,
+          "activity_variants": 1031
+        },
+        "K562": {
+          "effect": 0.5543000926366598,
+          "effect_variants": 200,
+          "effect_spearman": 0.4494532363309084,
+          "activity": 0.80640526186183,
+          "activity_variants": 1032
+        },
+        "mean_effect": 0.5716783819882457,
+        "mean_effect_spearman": 0.43085537700269483,
+        "mean_activity": 0.802470119133332,
+        "mean_effect_ci95": [
+          0.41954462212498494,
+          0.7091931533709704
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.12353708466362678,
+          0.026704663284638767
+        ]
+      },
+      "size22-54_no_near_copy": {
+        "HepG2": {
+          "effect": 0.6521929392436494,
+          "effect_variants": 16,
+          "effect_spearman": 0.6470588235294118,
+          "activity": 0.9186388439707719,
+          "activity_variants": 38
+        },
+        "K562": {
+          "effect": 0.4858729289352127,
+          "effect_variants": 15,
+          "effect_spearman": 0.5464285714285714,
+          "activity": 0.947031077745108,
+          "activity_variants": 38
+        },
+        "mean_effect": 0.5690329340894311,
+        "mean_effect_spearman": 0.5967436974789916,
+        "mean_activity": 0.9328349608579399,
+        "mean_effect_ci95": [
+          0.21824522020186385,
+          0.8390494995333471
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.02871413083314084,
+          0.33428378723011265
+        ]
+      },
+      "near_copies_only_size1-21": {
+        "HepG2": {
+          "effect": 0.699454654476044,
+          "effect_variants": 44,
+          "effect_spearman": 0.2904862579281184,
+          "activity": 0.7549688087582979,
+          "activity_variants": 191
+        },
+        "K562": {
+          "effect": 0.7709930555735679,
+          "effect_variants": 42,
+          "effect_spearman": 0.5629203468114415,
+          "activity": 0.7904870578645151,
+          "activity_variants": 190
+        },
+        "mean_effect": 0.735223855024806,
+        "mean_effect_spearman": 0.42670330236977994,
+        "mean_activity": 0.7727279333114065,
+        "mean_effect_ci95": [
+          0.22237669728416806,
+          0.9198750688154164
+        ],
+        "bootstrap_draws_degenerate": 0,
+        "model2_minus_this_ci95": [
+          -0.2673489542024989,
+          0.05200041983804782
+        ]
+      }
+    }
+  },
+  "SKNSH": {
+    "model2": {
+      "primary_size1-21_no_near_copy": {
+        "effect": 0.45728321435675123,
+        "effect_variants": 395
+      },
+      "size1-21_all": {
+        "effect": 0.4544261011330262,
+        "effect_variants": 440
+      },
+      "size1-54_all": {
+        "effect": 0.4904514101921503,
+        "effect_variants": 452
+      },
+      "deletions_primary": {
+        "effect": 0.430210220417728,
+        "effect_variants": 212
+      },
+      "insertions_primary": {
+        "effect": 0.4967470448140812,
+        "effect_variants": 183
+      },
+      "size1_no_near_copy": {
+        "effect": 0.5140404326889918,
+        "effect_variants": 200
+      },
+      "size2-21_no_near_copy": {
+        "effect": 0.4059460211846772,
+        "effect_variants": 195
+      },
+      "size22-54_no_near_copy": {
+        "effect": 0.6868804953428342,
+        "effect_variants": 12
+      },
+      "near_copies_only_size1-21": {
+        "effect": 0.4883157801676422,
+        "effect_variants": 45
+      }
+    },
+    "model2_seed2": {
+      "primary_size1-21_no_near_copy": {
+        "effect": 0.4695582698127967,
+        "effect_variants": 395
+      },
+      "size1-21_all": {
+        "effect": 0.46548659089719024,
+        "effect_variants": 440
+      },
+      "size1-54_all": {
+        "effect": 0.4923132278108685,
+        "effect_variants": 452
+      },
+      "deletions_primary": {
+        "effect": 0.45246665992051627,
+        "effect_variants": 212
+      },
+      "insertions_primary": {
+        "effect": 0.513833944652574,
+        "effect_variants": 183
+      },
+      "size1_no_near_copy": {
+        "effect": 0.5253912470227222,
+        "effect_variants": 200
+      },
+      "size2-21_no_near_copy": {
+        "effect": 0.4275231470603279,
+        "effect_variants": 195
+      },
+      "size22-54_no_near_copy": {
+        "effect": 0.6441625146145589,
+        "effect_variants": 12
+      },
+      "near_copies_only_size1-21": {
+        "effect": 0.4838637850866946,
+        "effect_variants": 45
+      }
+    }
+  },
+  "notes": "bootstrap: 2,000 resamples of 100,000-letter genome blocks, same resamples for all models and subsets"
+}

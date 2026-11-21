@@ -1,0 +1,19 @@
+{
+  "pass": true,
+  "framing": {
+    "frame_legnet_equals_pieces_on": 1000,
+    "mpac_chromosome": "13",
+    "mpac_pieces": 300,
+    "mpac_max_abs_difference": 0.0,
+    "device": "mps"
+  },
+  "model2": {
+    "here": 0.5838203048777085,
+    "earlier": 0.5838203048777074
+  },
+  "mpac": {
+    "here": 0.6088904446858113,
+    "earlier": 0.6088904446858119
+  },
+  "variants": 28104
+}
