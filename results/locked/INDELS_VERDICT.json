@@ -1,0 +1,66 @@
+{
+  "predeclaration": "predeclarations/PREDECLARATION_INDELS.md (CONFIRMED d148544, before the locked read)",
+  "run": "2026-11-21, once, blind",
+  "primary_subset": "primary_size1-21_no_near_copy",
+  "primary_variants": 2181,
+  "scored_per_cell": {
+    "HepG2": 430,
+    "K562": 439
+  },
+  "scores_primary": {
+    "model2": 0.4873,
+    "model2_seed2": 0.4959,
+    "student_v2": 0.4908,
+    "student_v2_seed2": 0.4722,
+    "published": 0.4196,
+    "baseline": 0.2037,
+    "mpac": 0.4791
+  },
+  "marks": {
+    "1_beat_model1_ci_above_zero": {
+      "pass": false,
+      "model2": 0.4873179351465399,
+      "model1": 0.49075741138529866,
+      "gain": -0.003439476238758732,
+      "ci95": [
+        -0.07544349663549794,
+        0.0814132816106537
+      ],
+      "note": "both clauses fail: model 2 is 0.0034 BELOW model 1, and the interval spans zero"
+    },
+    "2_min_mean_pearson_0.42": {
+      "pass": true,
+      "model2": 0.4873179351465399,
+      "mark": 0.42
+    },
+    "3_beat_published_and_baseline_ci_above_zero": {
+      "pass": true,
+      "vs_published_ci95": [
+        0.003393667127896262,
+        0.1375463852067464
+      ],
+      "vs_baseline_ci95": [
+        0.21338047673770116,
+        0.3448087688417618
+      ]
+    },
+    "4_seed_gap_at_most_0.03": {
+      "pass": true,
+      "gap": 0.008554280517438229,
+      "mark": 0.03
+    }
+  },
+  "verdict": "FAIL",
+  "verdict_reason": "mark 1 failed; marks 2, 3 and 4 passed. A pass needed all four.",
+  "headline": "Model 2's advantage over model 1 does NOT extend to insertions and deletions: 0.4873 against 0.4908, a difference of -0.0034 (95% interval -0.075 to 0.081). On the practice chromosomes the same comparison gave +0.074 (interval 0.006 to 0.141), so the practice gain did not replicate.",
+  "also_true": {
+    "beats_published": "0.4873 against 0.4196, interval [0.003, 0.138]",
+    "beats_baseline": "against 0.2037, interval [0.213, 0.345]",
+    "level_with_MPAC": "model 2 0.4873 against MPAC 0.4791, interval of the difference [-0.041, 0.058] contains zero, read as level by REFERENCE_MPAC.md's rule",
+    "model1_seed2": 0.4722,
+    "model2_seed2": 0.4959,
+    "both_seeds_of_both_models": "model 2: 0.4873 / 0.4959; model 1: 0.4908 / 0.4722 (so the two models overlap)"
+  },
+  "not_marks": "MPAC was reported, not a mark, as declared (its training data holds indel pieces; model 2 saw none).",
+  "closed": "The indels of chromosomes 5, 14 and 22 are now closed. The test was run once."
+}
