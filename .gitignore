@@ -7,3 +7,5 @@ data
 runs/
 released_weights
 results/practice/*.parquet
+results/practice/*.npy
+results/practice/smokeD_*.json
